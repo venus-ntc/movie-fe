@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html {
+  overflow-y: scroll;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+}
+
+@keyframes toastProgress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.toastCard {
+  animation: toastIn 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.toastCard[data-leaving="true"] {
+  animation: toastOut 0.26s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.toastProgress {
+  animation-name: toastProgress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toastCard,
+  .toastCard[data-leaving="true"] {
+    animation: none;
+  }
+  .toastProgress {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes authFadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes authPanelIn {
+    from {
+      opacity: 0;
+      transform: translateX(-26px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes authBlobFloat {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(10px, -22px) scale(1.06);
+    }
+  }
+
+  .authPanel {
+    opacity: 0;
+    animation: authPanelIn 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+
+  .authBlob {
+    animation: authBlobFloat 11s ease-in-out infinite;
+  }
+
+  .authFadeUp {
+    opacity: 0;
+    animation: authFadeUp 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+
+  .authFormWrap form > * {
+    opacity: 0;
+    animation: authFadeUp 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+  .authFormWrap form > *:nth-child(1) {
+    animation-delay: 0.22s;
+  }
+  .authFormWrap form > *:nth-child(2) {
+    animation-delay: 0.29s;
+  }
+  .authFormWrap form > *:nth-child(3) {
+    animation-delay: 0.36s;
+  }
+  .authFormWrap form > *:nth-child(4) {
+    animation-delay: 0.43s;
+  }
+  .authFormWrap form > *:nth-child(5) {
+    animation-delay: 0.5s;
+  }
+  .authFormWrap form > *:nth-child(6) {
+    animation-delay: 0.57s;
+  }
+}
