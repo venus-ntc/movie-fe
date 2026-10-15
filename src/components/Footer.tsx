@@ -3,26 +3,27 @@ import { Logo } from "@/components/Logo";
 
 const COLUMNS = [
 	{
-		title: "Sản phẩm",
+		title: "Khám phá",
 		links: [
-			{ label: "Phim đang chiếu", href: "/rooms" },
-			{ label: "Quản lý rạp", href: "/#operations" },
-			{ label: "Đặt vé", href: "/todos" },
+			{ label: "Phim đang chiếu", href: "/#movies" },
+			{ label: "Lịch chiếu theo rạp", href: "/#showtimes" },
+			{ label: "Đặt vé nhanh", href: "/#booking" },
+			{ label: "Ưu đãi & Khuyến mãi", href: "/#promotions" },
 		],
 	},
 	{
-		title: "Cộng đồng",
+		title: "Hệ thống",
 		links: [
-			{ label: "Đánh giá phim", href: "/#operations" },
+			{ label: "Cụm rạp CineFlow", href: "/#showtimes" },
 			{ label: "Về chúng tôi", href: "/about" },
-			{ label: "Liên hệ", href: "/about" },
+			{ label: "Bảo mật & Điều khoản", href: "/about" },
 		],
 	},
 	{
 		title: "Tài khoản",
 		links: [
 			{ label: "Đăng nhập", href: "/login" },
-			{ label: "Đăng ký", href: "/register" },
+			{ label: "Đăng ký thành viên", href: "/register" },
 		],
 	},
 ];
