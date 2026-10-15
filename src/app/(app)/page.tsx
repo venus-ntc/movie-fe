@@ -13,6 +13,7 @@ import { MOVIES, THEATERS, Movie } from "@/lib/mockData";
 
 export default function HomePage() {
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
+  const [movieKeyword, setMovieKeyword] = useState("");
 
   const handleWatchTrailer = (movie: Movie) => {
     setTrailerMovie(movie);
@@ -34,10 +35,10 @@ export default function HomePage() {
       <QuickBookingBar movies={MOVIES} theaters={THEATERS} />
 
       {/* 3. Phim Đang Chiếu & Sắp Chiếu (Movie Tabs Grid) */}
-      <MovieTabsSection movies={MOVIES} onWatchTrailer={handleWatchTrailer} />
+      <MovieTabsSection movies={MOVIES} onWatchTrailer={handleWatchTrailer} keyword={movieKeyword} onKeywordChange={setMovieKeyword} />
 
       {/* 4. Suất chiếu hôm nay theo rạp */}
-      <TodayShowtimes theaters={THEATERS} movies={MOVIES} />
+      <TodayShowtimes theaters={THEATERS} movies={MOVIES} keyword={movieKeyword} onKeywordChange={setMovieKeyword} />
 
       {/* 5. Ưu đãi & Khuyến mãi */}
       <PromotionSection />

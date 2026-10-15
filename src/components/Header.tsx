@@ -10,7 +10,7 @@ import { clearTokens, getAccessToken, type Profile } from "@/lib/api";
 
 const NAV = [
   { href: "/", label: "Trang chủ" },
-  { href: "/#movies", label: "Phim" },
+  { href: "/movies", label: "Phim" },
   { href: "/#showtimes", label: "Lịch chiếu" },
   { href: "/#promotions", label: "Khuyến mãi" },
   { href: "/about", label: "Về chúng tôi" },

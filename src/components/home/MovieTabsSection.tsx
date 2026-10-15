@@ -2,11 +2,16 @@
 
 import { useMemo, useState } from "react";
 import MovieCard from "./MovieCard";
+import MovieSearchInput from "./MovieSearchInput";
+import Link from "next/link";
+import { matchesMovieTitle } from "@/lib/movie-search";
 import { Movie } from "@/lib/mockData";
 
 interface MovieTabsSectionProps {
   movies: Movie[];
   onWatchTrailer: (movie: Movie) => void;
+  keyword: string;
+  onKeywordChange: (keyword: string) => void;
 }
 
 const GENRE_FILTERS = [
@@ -22,6 +27,8 @@ const GENRE_FILTERS = [
 export default function MovieTabsSection({
   movies,
   onWatchTrailer,
+  keyword,
+  onKeywordChange,
 }: MovieTabsSectionProps) {
   const [activeTab, setActiveTab] = useState<"now_showing" | "coming_soon">(
     "now_showing"
@@ -36,12 +43,12 @@ export default function MovieTabsSection({
         movie.genres.some(
           (g) => g.toLowerCase() === selectedGenre.toLowerCase()
         );
-      return matchStatus && matchGenre;
+      return matchStatus && matchGenre && matchesMovieTitle(movie, keyword);
     });
-  }, [movies, activeTab, selectedGenre]);
+  }, [movies, activeTab, selectedGenre, keyword]);
 
-  const nowShowingCount = movies.filter((m) => m.status === "now_showing").length;
-  const comingSoonCount = movies.filter((m) => m.status === "coming_soon").length;
+  const nowShowingCount = movies.filter((m) => m.status === "now_showing" && matchesMovieTitle(m, keyword)).length;
+  const comingSoonCount = movies.filter((m) => m.status === "coming_soon" && matchesMovieTitle(m, keyword)).length;
 
   return (
     <section id="movies" className="mx-auto max-w-6xl px-4 sm:px-6 py-14 sm:py-18">
@@ -98,6 +105,12 @@ export default function MovieTabsSection({
         </div>
       </div>
 
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <MovieSearchInput value={keyword} onChange={onKeywordChange} label="Tìm phim trên trang chủ" />
+        <Link href={`/movies?${new URLSearchParams({ demo: "1", keyword: keyword.trim() })}`} className="pb-3 text-xs font-semibold text-red-400 hover:text-red-300">Bộ lọc nâng cao: rạp, ngày, giá vé ↗</Link>
+      </div>
+      <p role="status" className="mt-3 text-xs text-neutral-400">{keyword.trim() ? `Tìm thấy ${filteredMovies.length} phim trong tab đang chọn cho “${keyword.trim()}”.` : "Tìm theo tên phim hoặc tên gốc, có thể nhập không dấu."}</p>
+
       {/* Genre Filter Pills */}
       <div className="mt-5 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
         {GENRE_FILTERS.map((genre) => (
@@ -130,11 +143,11 @@ export default function MovieTabsSection({
       ) : (
         <div className="mt-12 rounded-2xl border border-white/5 bg-neutral-900/30 py-16 text-center">
           <p className="text-sm text-neutral-400">
-            Không tìm thấy phim nào phù hợp với thể loại &quot;{selectedGenre}&quot;.
+            Không có phim phù hợp với từ khóa và bộ lọc đang chọn. Thử tab khác hoặc xóa bộ lọc.
           </p>
           <button
             type="button"
-            onClick={() => setSelectedGenre("Tất Cả")}
+            onClick={() => { setSelectedGenre("Tất Cả"); onKeywordChange(""); }}
             className="mt-3 text-xs font-semibold text-red-400 hover:underline"
           >
             Xem tất cả phim

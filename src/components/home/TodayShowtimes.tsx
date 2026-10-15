@@ -3,13 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Movie, Theater } from "@/lib/mockData";
+import MovieSearchInput from "./MovieSearchInput";
+import { matchesMovieTitle } from "@/lib/movie-search";
 
 interface TodayShowtimesProps {
   theaters: Theater[];
   movies: Movie[];
+  keyword: string;
+  onKeywordChange: (keyword: string) => void;
 }
 
-export default function TodayShowtimes({ theaters, movies }: TodayShowtimesProps) {
+export default function TodayShowtimes({ theaters, movies, keyword, onKeywordChange }: TodayShowtimesProps) {
   const [selectedTheaterId, setSelectedTheaterId] = useState<string>(
     theaters[0]?.id || ""
   );
@@ -25,7 +29,7 @@ export default function TodayShowtimes({ theaters, movies }: TodayShowtimesProps
         showtimes: schedule.showtimes,
       };
     })
-    .filter((item) => item.movie !== undefined);
+    .filter((item) => item.movie !== undefined && matchesMovieTitle(item.movie, keyword));
 
   return (
     <section id="showtimes" className="mx-auto max-w-6xl px-4 sm:px-6 py-12 sm:py-16">
@@ -63,6 +67,11 @@ export default function TodayShowtimes({ theaters, movies }: TodayShowtimesProps
           </div>
         </div>
 
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <MovieSearchInput value={keyword} onChange={onKeywordChange} label="Tìm phim trong lịch chiếu" placeholder="Tìm phim đang chiếu tại rạp này…" />
+          <p role="status" className="pb-3 text-xs text-neutral-400">{scheduledMovies.length} phim có lịch tại rạp đang chọn</p>
+        </div>
+
         {/* Current Theater Address Info */}
         {currentTheater && (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-400 bg-neutral-950/40 px-4 py-2.5 rounded-xl border border-white/5">
@@ -79,6 +88,11 @@ export default function TodayShowtimes({ theaters, movies }: TodayShowtimesProps
 
         {/* Scheduled Movies List */}
         <div className="mt-8 space-y-6">
+          {scheduledMovies.length === 0 && <div className="rounded-xl border border-dashed border-white/15 p-8 text-center">
+            <p className="text-sm text-neutral-400">Không tìm thấy phim phù hợp trong lịch của rạp này.</p>
+            <p className="mt-2 text-xs text-neutral-500">Thử chọn rạp khác hoặc đổi từ khóa.</p>
+            {keyword && <button type="button" onClick={() => onKeywordChange("")} className="mt-4 text-xs font-semibold text-red-400 hover:underline">Xóa từ khóa</button>}
+          </div>}
           {scheduledMovies.map(({ movie, showtimes }) => {
             if (!movie) return null;
             return (
