@@ -25,7 +25,8 @@ export function useRegister() {
       email: string;
       fullName: string;
       password: string;
-    }) => register(vars.email, vars.fullName, vars.password),
+      phoneNumber?: string;
+    }) => register(vars.email, vars.fullName, vars.password, vars.phoneNumber),
   });
 }
 
@@ -49,6 +50,6 @@ export function useResetPassword() {
   return useMutation({
     mutationFn: (vars: { email: string; otp: string; newPassword: string }) =>
       resetPassword(vars.email, vars.otp, vars.newPassword),
-    onSuccess: () => router.push("/rooms"),
+    onSuccess: () => router.push("/login"),
   });
 }

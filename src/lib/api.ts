@@ -1,8 +1,8 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const AUTH = `${API_BASE}/api/v1/auth`;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+const AUTH = `${API_BASE}/api/auth`;
 
-const ACCESS_KEY = "access_token";
-const REFRESH_KEY = "refresh_token";
+const ACCESS_KEY = "accessToken";
+const REFRESH_KEY = "refreshToken";
 
 export function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -44,7 +44,7 @@ export async function refreshAccessToken(): Promise<string> {
 
   if (!refreshPromise) {
     refreshPromise = (async () => {
-      const res = await fetch(`${AUTH}/refresh-token/`, {
+      const res = await fetch(`${AUTH}/refresh-token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh }),
@@ -54,8 +54,10 @@ export async function refreshAccessToken(): Promise<string> {
         throw new ApiError(res.status, await res.json().catch(() => null));
       }
       const data = await res.json();
-      setTokens(data.access, data.refresh);
-      return data.access as string;
+      const newAccess = data.accessToken || data.access;
+      const newRefresh = data.refreshToken || data.refresh;
+      setTokens(newAccess, newRefresh);
+      return newAccess as string;
     })().finally(() => {
       refreshPromise = null;
     });
@@ -73,7 +75,12 @@ export async function apiFetch<T = unknown>(
   if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  let cleanPath = path.replace(/^\/+|\/+$/g, "");
+  cleanPath = cleanPath.replace(/^api\/v1\//, "").replace(/^api\//, "");
+  
+  const url = `${API_BASE}/api/${cleanPath}`;
+
+  const res = await fetch(url, { ...options, headers });
 
   if (res.status === 401 && retryOn401 && getRefreshToken()) {
     try {
@@ -91,20 +98,43 @@ export async function apiFetch<T = unknown>(
 }
 
 export interface LoginResponse {
+  accessToken?: string;
   access?: string;
   refresh?: string;
+  user?: unknown;
+  data?: any;
   [key: string]: unknown;
 }
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch(`${AUTH}/login/`, {
+  const res = await fetch(`${AUTH}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
+
   if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => null));
+
   const data: LoginResponse = await res.json();
-  if (data.access) setTokens(data.access, data.refresh);
+
+  // Bóc tách token linh hoạt từ các kiểu Response của NestJS
+  const token =
+    data.accessToken ||
+    data.access ||
+    (data.data as any)?.accessToken ||
+    (data.result as any)?.accessToken;
+
+  const refresh =
+    data.refreshToken ||
+    data.refresh ||
+    (data.data as any)?.refreshToken;
+
+  if (token) {
+    setTokens(token, refresh);
+  } else {
+    throw new ApiError(500, { message: "Không tìm thấy token trong phản hồi từ server!" });
+  }
+
   return data;
 }
 
@@ -113,7 +143,8 @@ async function authPost<T = unknown>(
   body: Record<string, unknown>,
   method: "POST" | "PUT" = "POST"
 ): Promise<T> {
-  const res = await fetch(`${AUTH}/${path}`, {
+  const cleanPath = path.replace(/\/+$/, "");
+  const res = await fetch(`${AUTH}/${cleanPath}`, {
     method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -127,22 +158,23 @@ async function authPost<T = unknown>(
 export async function register(
   email: string,
   fullName: string,
-  password: string
+  password: string,
+  phoneNumber?: string
 ): Promise<{ message?: string }> {
-  return authPost("register/", { email, full_name: fullName, password });
+  return authPost("register", { email, fullName, password, phoneNumber });
 }
 
 export async function verifyEmail(
   email: string,
   otp: string
 ): Promise<{ message?: string }> {
-  return authPost("verify-email/", { email, otp });
+  return authPost("verify-email", { email, otp });
 }
 
 export async function requestPasswordReset(
   email: string
 ): Promise<{ message?: string }> {
-  return authPost("resend-otp/", { email });
+  return authPost("resend-otp", { email });
 }
 
 export async function resetPassword(
@@ -151,19 +183,22 @@ export async function resetPassword(
   newPassword: string
 ): Promise<LoginResponse> {
   const data = await authPost<LoginResponse>(
-    "reset-password/",
+    "reset-password",
     { email, otp, new_password: newPassword },
     "PUT"
   );
-  if (data.access) setTokens(data.access, data.refresh);
+  const token = data.accessToken || data.access;
+  if (token) setTokens(token, data.refresh);
   return data;
 }
 
 export interface Profile {
   id: number;
   email: string;
-  full_name: string;
+  full_name?: string;
+  fullName?: string;
   phone_number?: string | null;
+  phoneNumber?: string | null;
   profile_picture?: string | null;
   is_verified?: boolean;
   level?: number;
@@ -174,12 +209,14 @@ export interface Profile {
 }
 
 export async function getProfile(): Promise<Profile> {
-  return apiFetch<Profile>("/api/v1/auth/user/profile/");
+  return apiFetch<Profile>("auth/profile");
 }
 
 export interface UpdateProfilePayload {
   full_name?: string;
+  fullName?: string;
   phone_number?: string;
+  phoneNumber?: string;
   profile_picture?: string;
 }
 
@@ -187,7 +224,7 @@ export async function updateProfile(
   payload: UpdateProfilePayload
 ): Promise<{ message?: string; data: Profile }> {
   return apiFetch<{ message?: string; data: Profile }>(
-    "/api/v1/auth/user/profile/update/",
+    "auth/profile",
     { method: "PATCH", body: JSON.stringify(payload) }
   );
 }
@@ -205,11 +242,11 @@ export interface StudySession {
 }
 
 export function startSession(): Promise<StudySession> {
-  return apiFetch<StudySession>("/api/v1/sessions/start/", { method: "POST" });
+  return apiFetch<StudySession>("sessions/start", { method: "POST" });
 }
 
 export function endSession(): Promise<StudySession> {
-  return apiFetch<StudySession>("/api/v1/sessions/end/", { method: "POST" });
+  return apiFetch<StudySession>("sessions/end", { method: "POST" });
 }
 
 export function readApiError(err: unknown, fallback = "Có lỗi xảy ra, thử lại sau."): string {
@@ -219,8 +256,8 @@ export function readApiError(err: unknown, fallback = "Có lỗi xảy ra, thử
     if (data && typeof data === "object") {
       const obj = data as Record<string, unknown>;
       const first =
-        obj.detail ??
         obj.message ??
+        obj.detail ??
         obj.non_field_errors ??
         Object.values(obj)[0];
       if (Array.isArray(first)) return String(first[0]);
