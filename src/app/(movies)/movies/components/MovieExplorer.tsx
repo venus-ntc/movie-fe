@@ -5,17 +5,42 @@ import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getMovies, Movie as BackendMovie, isAdmin } from "@/lib/api";
 import { MOVIES, THEATERS } from "@/lib/mockData";
-import { emptyFilters, timeLabel, price, type CinemaMovie, type Filters } from "@/components/cinema/cinema-api";
+import { emptyFilters, timeLabel, price, type CinemaMovie, type CinemaShowtime,type Filters } from "@/components/cinema/cinema-api";
 import { demoCatalog } from "@/components/cinema/demo-data";
 import Poster from "@/components/cinema/Poster";
 import styles from "@/components/cinema/cinema.module.css";
 
 // Adapter map dữ liệu từ Backend NestJS, đồng thời tạo suất chiếu dùng được với sơ đồ ghế demo
 function adaptBackendToCinemaMovie(m: BackendMovie): CinemaMovie {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const dateStr = tomorrow.toISOString().split("T")[0];
+  // Tìm xem bộ phim từ Backend có khớp với dữ liệu Demo trong mockData hay không
+  const matchedDemoMovie = MOVIES.find(
+    (demo) => String(demo.id) === String(m.id) || demo.title.toLowerCase() === m.title.toLowerCase()
+  );
 
+  let demoShowtimes: CinemaShowtime[] = [];
+
+  // NẾU LÀ PHIM CÓ TRONG DEMO: Lấy suất chiếu từ mockData
+  if (matchedDemoMovie) {
+    const today = new Date().toISOString().split("T")[0];
+    demoShowtimes = THEATERS.flatMap((theater) =>
+      theater.schedules
+        .filter((schedule) => schedule.movieId === matchedDemoMovie.id)
+        .flatMap((schedule) =>
+          schedule.showtimes.map((st) => ({
+            id: st.id,
+            startTime: `${today}T${st.time}:00+07:00`,
+            basePrice: st.price,
+            room: {
+              id: st.room,
+              name: st.room,
+              cinema: { id: theater.id, name: theater.name },
+            },
+          }))
+        )
+    );
+  }
+
+  // NẾU KHÔNG CÓ TRONG DEMO: showtimes sẽ là [] rỗng (Giao diện sẽ báo "Lịch chiếu sẽ sớm được cập nhật.")
   return {
     id: String(m.id),
     title: m.title,
@@ -30,28 +55,7 @@ function adaptBackendToCinemaMovie(m: BackendMovie): CinemaMovie {
     trailerUrl: m.trailerUrl || "",
     status: m.status,
     rating: Number(m.rating) || 0,
-    showtimes: [
-      {
-        id: "1",
-        startTime: `${dateStr}T14:30:00Z`,
-        basePrice: 90000,
-        room: {
-          id: "r1",
-          name: "Phòng 01 - IMAX Laser",
-          cinema: { id: "c1", name: "CGV Landmark 81" },
-        },
-      },
-      {
-        id: "4",
-        startTime: `${dateStr}T21:00:00Z`,
-        basePrice: 110000,
-        room: {
-          id: "r2",
-          name: "Phòng 01 - IMAX Laser",
-          cinema: { id: "c1", name: "CGV Landmark 81" },
-        },
-      },
-    ],
+    showtimes: demoShowtimes,
   } as CinemaMovie;
 }
 

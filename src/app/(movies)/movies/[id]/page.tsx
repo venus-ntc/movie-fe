@@ -4,10 +4,11 @@ import { use } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getMovieById } from "@/lib/api";
+import { MOVIES, THEATERS } from "@/lib/mockData";
+import { timeLabel, price } from "@/components/cinema/cinema-api";
 import Poster from "@/components/cinema/Poster";
 import styles from "@/components/cinema/cinema.module.css";
 
-// Helper chuyển link YouTube thành link nhúng embed
 function getEmbedTrailerUrl(url?: string | null) {
   if (!url) return null;
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
@@ -44,11 +45,33 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
     );
   }
 
+  // Lấy các suất chiếu mẫu từ mockData tương ứng với phim (nếu có)
+  const matchedDemoMovie = MOVIES.find(
+    (demo) => String(demo.id) === String(movie.id) || demo.title.toLowerCase() === movie.title.toLowerCase()
+  );
+
+  const today = new Date().toISOString().split("T")[0];
+  const showtimes = matchedDemoMovie
+    ? THEATERS.flatMap((theater) =>
+        theater.schedules
+          .filter((schedule) => schedule.movieId === matchedDemoMovie.id)
+          .flatMap((schedule) =>
+            schedule.showtimes.map((st) => ({
+              id: st.id,
+              startTime: `${today}T${st.time}:00+07:00`,
+              basePrice: st.price,
+              cinemaName: theater.name,
+              roomName: st.room,
+            }))
+          )
+      )
+    : [];
+
   const embedUrl = getEmbedTrailerUrl(movie.trailerUrl);
 
   return (
     <div className={styles.page}>
-      {/* Banner nền Backdrop */}
+      {/* Banner Backdrop */}
       <div
         style={{
           width: "100%",
@@ -61,7 +84,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
       />
 
       <div className={styles.container} style={{ marginTop: "-180px", position: "relative", zIndex: 10 }}>
-        {/* Breadcrumb navigation */}
+        {/* Breadcrumb */}
         <div className={styles.breadcrumb} style={{ marginBottom: "20px" }}>
           <Link href="/">Trang chủ</Link>
           <span>/</span>
@@ -70,14 +93,12 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
           <span>{movie.title}</span>
         </div>
 
-        {/* Thông tin chính Phim */}
+        {/* Khối Thông tin chính */}
         <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "32px", marginBottom: "40px" }}>
-          {/* Poster bọc viền đẹp mắt */}
           <div>
             <Poster src={movie.posterUrl || undefined} title={movie.title} className={styles.poster} />
           </div>
 
-          {/* Chi tiết nội dung */}
           <div style={{ color: "#fff" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
               <span style={{ padding: "4px 10px", background: "#e50914", borderRadius: "4px", fontWeight: "bold", fontSize: "13px" }}>
@@ -118,29 +139,50 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
               <h3 style={{ margin: "0 0 8px 0", fontSize: "16px", color: "#fff" }}>Nội dung phim</h3>
               <p style={{ color: "#aaa", margin: 0, lineHeight: "1.6" }}>{movie.description || "Chưa có mô tả chi tiết cho bộ phim này."}</p>
             </div>
-
-            <Link
-              href={`/booking/seats?movieId=${movie.id}&showtimeId=1`}
-              style={{
-                display: "inline-block",
-                padding: "12px 28px",
-                background: "#e50914",
-                color: "#fff",
-                fontWeight: "bold",
-                borderRadius: "6px",
-                textDecoration: "none",
-                boxShadow: "0 4px 12px rgba(229, 9, 20, 0.4)",
-              }}
-            >
-              🎟 Đặt Vé Phim Này
-            </Link>
           </div>
+        </div>
+
+        {/* BẢNG LỊCH CHIẾU VÀ KHUNG GIỜ */}
+        <div style={{ marginBottom: "50px", background: "#18181c", padding: "24px", borderRadius: "10px", border: "1px solid #333" }}>
+          <h2 style={{ color: "#fff", fontSize: "20px", marginBottom: "16px", borderLeft: "4px solid #e50914", paddingLeft: "10px" }}>
+            Lịch Chiếu & Suất Chiếu
+          </h2>
+
+          {showtimes.length > 0 ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "12px" }}>
+              {showtimes.map((st) => (
+                <Link
+                  key={st.id}
+                  href={`/booking/seats?movieId=${movie.id}&showtimeId=${st.id}`}
+                  style={{
+                    display: "block",
+                    padding: "12px",
+                    background: "#222",
+                    border: "1px solid #444",
+                    borderRadius: "6px",
+                    color: "#fff",
+                    textDecoration: "none",
+                    textAlign: "center",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <strong style={{ display: "block", fontSize: "18px", color: "#e50914" }}>{timeLabel(st.startTime)}</strong>
+                  <small style={{ display: "block", color: "#aaa", fontSize: "12px", marginTop: "4px" }}>
+                    {st.cinemaName} ({st.roomName})
+                  </small>
+                  <span style={{ display: "block", fontSize: "12px", color: "#ffc107", marginTop: "4px" }}>{price(st.basePrice)}</span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: "#aaa", margin: 0 }}>Lịch chiếu cho bộ phim này sẽ sớm được cập nhật.</p>
+          )}
         </div>
 
         {/* Video Trailer YouTube */}
         {embedUrl && (
           <div style={{ marginBottom: "60px" }}>
-            <h2 style={{ color: "#fff", fontSize: "22px", marginBottom: "16px", borderLeft: "4px solid #e50914", paddingLeft: "10px" }}>
+            <h2 style={{ color: "#fff", fontSize: "20px", marginBottom: "16px", borderLeft: "4px solid #e50914", paddingLeft: "10px" }}>
               Trailer Chính Thức
             </h2>
             <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", borderRadius: "10px", border: "1px solid #333" }}>
