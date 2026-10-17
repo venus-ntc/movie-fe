@@ -183,8 +183,8 @@ export default function AdminMoviesPage() {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
         <div>
-          <h1 style={{ fontSize: "26px", fontWeight: "700", margin: 0, letterSpacing: "-0.02em" }}>Quản Lý Danh Sách Phim</h1>
-          <p style={{ color: "#9ca3af", fontSize: "14px", margin: "6px 0 0 0" }}>Hệ thống quản trị dữ liệu phim dành cho Admin</p>
+          <h1 style={{ color: "#292e36", fontSize: "26px", fontWeight: "700", margin: 0, letterSpacing: "-0.02em" }}>Quản Lý Danh Sách Phim</h1>
+          <p style={{ color: "#404247", fontSize: "14px", margin: "6px 0 0 0" }}>Hệ thống quản trị dữ liệu phim dành cho Admin</p>
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
           <Link
@@ -434,7 +434,7 @@ export default function AdminMoviesPage() {
                     type="date"
                     value={releaseDate}
                     onChange={(e) => setReleaseDate(e.target.value)}
-                    style={{ width: "100%", padding: "10px", background: "#09090b", border: "1px solid #3f3f46", color: "#fff", borderRadius: "8px", fontSize: "14px" }}
+                    style={{ colorScheme: "dark", width: "100%", padding: "10px", background: "#09090b", border: "1px solid #3f3f46", color: "#fff", borderRadius: "8px", fontSize: "14px" }}
                   />
                 </div>
                 <div>
