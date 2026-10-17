@@ -3,19 +3,43 @@ import { getAccessToken } from "@/lib/api";
 const CINEMA_API = (process.env.NEXT_PUBLIC_CINEMA_API_URL || "http://localhost:3000/api").replace(/\/$/, "");
 
 export type CinemaShowtime = {
-  id: string | number; startTime: string; endTime?: string; basePrice: number | string;
+  id: string | number; 
+  startTime: string; 
+  endTime?: string; 
+  basePrice: number | string;
   room?: { id?: string | number; name?: string; cinema?: { id?: string | number; name?: string } };
 };
+
 export type CinemaMovie = {
-  id: string | number; title: string; description?: string; posterUrl?: string;
-  durationMinutes?: number; rating?: number; ageRating?: string; status?: string;
-  genres?: { id?: string | number; name: string }[]; showtimes?: CinemaShowtime[];
+  id: string | number; 
+  title: string; 
+  description?: string; 
+  posterUrl?: string;
+  durationMinutes?: number; 
+  rating?: number; 
+  ageRating?: string; 
+  status?: string;
+  releaseDate?: string; // 👈 Đã thêm ngày khởi chiếu
+  director?: string;    // 👈 Đã thêm Đạo diễn
+  cast?: string;        // 👈 Đã thêm Dàn diễn viên
+  trailerUrl?: string;  // 👈 Đã thêm Trailer URL
+  genres?: { id?: string | number; name: string }[]; 
+  showtimes?: CinemaShowtime[];
 };
+
 export type CinemaSeat = {
-  id: number; row: string; column: number; seatNumber: string; type: string;
-  priceMultiplier: number; status: "AVAILABLE" | "HOLDING" | "BOOKED" | "INACTIVE";
-  isHeldByMe: boolean; canRelease: boolean; remainingTtl: number;
+  id: number; 
+  row: string; 
+  column: number; 
+  seatNumber: string; 
+  type: string;
+  priceMultiplier: number; 
+  status: "AVAILABLE" | "HOLDING" | "BOOKED" | "INACTIVE";
+  isHeldByMe: boolean; 
+  canRelease: boolean; 
+  remainingTtl: number;
 };
+
 export type Screening = CinemaShowtime & { movie?: CinemaMovie };
 export type Filters = { keyword: string; genre: string; cinemaId: string; date: string; minPrice: string; maxPrice: string };
 export const emptyFilters: Filters = { keyword: "", genre: "", cinemaId: "", date: "", minPrice: "", maxPrice: "" };
@@ -26,7 +50,12 @@ export async function cinemaRequest<T>(path: string, options: RequestInit = {}):
   if (token) headers.set("Authorization", `Bearer ${token}`);
   if (options.body) headers.set("Content-Type", "application/json");
   const timeout = AbortSignal.timeout(10000);
-  const response = await fetch(`${CINEMA_API}${path}`, { ...options, headers, cache: "no-store", signal: options.signal ? AbortSignal.any([options.signal, timeout]) : timeout });
+  const response = await fetch(`${CINEMA_API}${path}`, { 
+    ...options, 
+    headers, 
+    cache: "no-store", 
+    signal: options.signal ? AbortSignal.any([options.signal, timeout]) : timeout 
+  });
   const body = await response.json().catch(() => null);
   if (!response.ok || body?.success === false) {
     const message = response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." : body?.message;

@@ -16,9 +16,12 @@ export default function RegisterPage() {
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState("");
+  const [localError, setLocalError] = useState("");
 
   const registerMutation = useRegister();
   const verifyMutation = useVerifyEmail();
@@ -26,12 +29,19 @@ export default function RegisterPage() {
 
   function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+    setLocalError("");
+
+    if (password !== confirmPassword) {
+      setLocalError("Mật khẩu xác nhận không trùng khớp!");
+      return;
+    }
+
     registerMutation.mutate(
-      { email, fullName, password },
+      { email, fullName, password, phoneNumber: phoneNumber || undefined },
       {
         onSuccess: () => {
           setStep("otp");
-          toast.success("Đã gửi mã xác thực", `Kiểm tra hộp thư ${email}.`);
+          toast.success("Đã khởi tạo đăng ký", `Mã xác thực đã hiển thị tại Terminal Backend.`);
         },
         onError: (err) => toast.error("Đăng ký thất bại", readApiError(err)),
       }
@@ -52,8 +62,8 @@ export default function RegisterPage() {
         title="Xác thực email"
         subtitle={
           <>
-            Nhập mã đã gửi tới{" "}
-            <strong className="font-medium text-[#1b1b19]">{email}</strong>.
+            Nhập mã OTP đã tạo cho{" "}
+            <strong className="font-medium text-[#1b1b19]">{email}</strong> (xem tại Terminal Backend).
           </>
         }
         footer={
@@ -71,12 +81,12 @@ export default function RegisterPage() {
       >
         <form onSubmit={handleVerify} className="mt-8 flex flex-col gap-4">
           <p className="rounded-xl border border-[#cfe0d2] bg-[#eef4ef] px-4 py-3 text-sm text-[#4a6b50]">
-            Đã gửi mã xác thực tới {email}.
+            Mã OTP được giả lập hiển thị tại <strong>Terminal Backend</strong>.
           </p>
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="otp" className="text-sm font-medium text-[#6b6b66]">
-              Mã xác thực
+              Mã xác thực (OTP)
             </label>
             <input
               id="otp"
@@ -128,12 +138,13 @@ export default function RegisterPage() {
       }
     >
       <form onSubmit={handleRegister} className="mt-8 flex flex-col gap-4">
+        {/* Họ và tên */}
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="fullName"
             className="text-sm font-medium text-[#6b6b66]"
           >
-            Họ và tên
+            Họ và tên *
           </label>
           <input
             id="fullName"
@@ -147,9 +158,10 @@ export default function RegisterPage() {
           />
         </div>
 
+        {/* Email */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="email" className="text-sm font-medium text-[#6b6b66]">
-            Email
+            Email *
           </label>
           <input
             id="email"
@@ -163,23 +175,43 @@ export default function RegisterPage() {
           />
         </div>
 
+        {/* Số điện thoại */}
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="phoneNumber"
+            className="text-sm font-medium text-[#6b6b66]"
+          >
+            Số điện thoại
+          </label>
+          <input
+            id="phoneNumber"
+            type="tel"
+            autoComplete="tel"
+            placeholder="0987654321"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className={fieldClass}
+          />
+        </div>
+
+        {/* Mật khẩu */}
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="password"
             className="text-sm font-medium text-[#6b6b66]"
           >
-            Mật khẩu
+            Mật khẩu *
           </label>
           <div className="relative">
             <input
               id="password"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
-              placeholder="Tối thiểu 8 ký tự"
+              placeholder="Tối thiểu 6 ký tự"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={8}
+              minLength={6}
               className={`${fieldClass} pr-12`}
             />
             <button
@@ -192,6 +224,35 @@ export default function RegisterPage() {
             </button>
           </div>
         </div>
+
+        {/* Xác nhận mật khẩu */}
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="confirmPassword"
+            className="text-sm font-medium text-[#6b6b66]"
+          >
+            Xác nhận mật khẩu *
+          </label>
+          <input
+            id="confirmPassword"
+            type={showPassword ? "text" : "password"}
+            autoComplete="new-password"
+            placeholder="Nhập lại mật khẩu"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            className={fieldClass}
+          />
+        </div>
+
+        {localError && (
+          <p
+            role="alert"
+            className="rounded-xl border border-[#e7c6b8] bg-[#f8ece6] px-4 py-3 text-sm text-[#a8503a]"
+          >
+            {localError}
+          </p>
+        )}
 
         {registerMutation.isError && (
           <p
