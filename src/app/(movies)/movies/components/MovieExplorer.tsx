@@ -58,9 +58,11 @@ function adaptBackendToCinemaMovie(m: BackendMovie): CinemaMovie {
 function FilmCard({ movie, demo, day }: { movie: CinemaMovie; demo: boolean; day: string }) {
   const [expanded, setExpanded] = useState(false);
   const showtimes = movie.showtimes || [];
+
   return (
     <article className={styles.film}>
-      <div className={styles.posterWrap}>
+      {/* Click vào Poster chuyển sang trang chi tiết */}
+      <Link href={`/movies/${movie.id}`} className={styles.posterWrap}>
         <Poster src={movie.posterUrl} title={movie.title} className={styles.poster} />
         <div className={styles.posterBadges}>
           <span className={styles.age}>{movie.ageRating || "PHIM"}</span>
@@ -70,19 +72,35 @@ function FilmCard({ movie, demo, day }: { movie: CinemaMovie; demo: boolean; day
           <span>ĐIỆN ẢNH • 2D</span>
           <span>{movie.durationMinutes || "—"} PHÚT</span>
         </div>
-      </div>
+      </Link>
+
       <div className={styles.filmBody}>
         <p className={styles.genre}>{movie.genres?.map((genre) => genre.name).join(" · ") || "Điện ảnh"}</p>
-        <h2>{movie.title}</h2>
+        
+        {/* Click vào Tiêu đề chuyển sang trang chi tiết */}
+        <h2>
+          <Link href={`/movies/${movie.id}`} style={{ color: "inherit", textDecoration: "none" }}>
+            {movie.title}
+          </Link>
+        </h2>
+
+        {/* Dòng tóm tắt mô tả ngắn & đạo diễn */}
+        {movie.director && (
+          <p style={{ fontSize: "13px", color: "#aaa", margin: "4px 0" }}>
+            Đạo diễn: <span style={{ color: "#eee" }}>{movie.director}</span>
+          </p>
+        )}
+
         <div className={styles.showtimeHeading}>
           <span>SUẤT CHIẾU</span>
           <span>{showtimes.length ? `Từ ${price(Math.min(...showtimes.map((item) => Number(item.basePrice))))}` : "Chưa mở bán"}</span>
         </div>
+
         <div className={styles.showtimeGrid}>
           {showtimes.slice(0, expanded ? undefined : 4).map((showtime) => {
             const params = new URLSearchParams({
               showtimeId: String(showtime.id),
-              movieId: "1",
+              movieId: String(movie.id),
             });
             if (demo || !demo) {
               params.set("date", day || showtime.startTime.slice(0, 10));
