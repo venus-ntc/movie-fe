@@ -6,28 +6,29 @@ import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Logo } from "@/components/Logo";
 import { useProfile } from "@/hooks/useProfile";
-import { clearTokens, getAccessToken, type Profile } from "@/lib/api";
+import { clearTokens, getAccessToken, isAdmin, type Profile } from "@/lib/api";
 
 const NAV = [
   { href: "/", label: "Trang chủ" },
   { href: "/movies", label: "Phim" },
+  { href: "/cinemas", label: "Rạp chiếu" },
   { href: "/#showtimes", label: "Lịch chiếu" },
   { href: "/#promotions", label: "Khuyến mãi" },
   { href: "/about", label: "Về chúng tôi" },
 ];
 
 function initialOf(profile?: Profile): string {
-  const src = profile?.full_name?.trim() || profile?.email?.trim() || "";
+  const src = profile?.full_name?.trim() || profile?.fullName?.trim() || profile?.email?.trim() || "";
   return src ? src[0].toUpperCase() : "U";
 }
 
 function Avatar({ profile, size = 36 }: { profile?: Profile; size?: number }) {
   const pic = profile?.profile_picture;
-  if (pic && /^https?:\/\//.test(pic)) {
+  if (pic && typeof pic === "string" && /^https?:\/\//.test(pic)) {
     return (
       <img
         src={pic}
-        alt={profile?.full_name ?? "Avatar"}
+        alt={(profile?.full_name || profile?.fullName) ?? "Avatar"}
         width={size}
         height={size}
         className="rounded-full object-cover"
@@ -56,8 +57,12 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    setUserIsAdmin(isAdmin());
+  }, []);
 
   const { data: profile, isError } = useProfile();
   const loggedIn = mounted && !!getAccessToken() && !isError;
@@ -75,6 +80,7 @@ export default function Header() {
     queryClient.removeQueries({ queryKey: ["profile"] });
     setOpen(false);
     setMenuOpen(false);
+    setUserIsAdmin(false);
     router.push("/");
     router.refresh();
   }
@@ -137,7 +143,7 @@ export default function Header() {
                       <Avatar profile={profile} size={40} />
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-[#1b1b19]">
-                          {profile?.full_name || "Người dùng"}
+                          {profile?.full_name || profile?.fullName || "Người dùng"}
                         </p>
                         <p className="truncate text-xs text-[#6b6b66]">
                           {profile?.email}
@@ -152,6 +158,29 @@ export default function Header() {
                       >
                         Thông tin cá nhân
                       </Link>
+
+                      {/* Các đường dẫn quản trị dành riêng cho Admin */}
+                      {userIsAdmin && (
+                        <>
+                          <div className="my-1 border-t border-[#efece4]" />
+                          <Link
+                            href="/admin/movies"
+                            onClick={() => setMenuOpen(false)}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-[#e50914] transition-colors hover:bg-[#fef2f2]"
+                          >
+                            🎬 Quản lý Phim
+                          </Link>
+                          <Link
+                            href="/admin/cinemas"
+                            onClick={() => setMenuOpen(false)}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-[#2563eb] transition-colors hover:bg-[#eff6ff]"
+                          >
+                            🏢 Quản lý Rạp
+                          </Link>
+                          <div className="my-1 border-t border-[#efece4]" />
+                        </>
+                      )}
+
                       <button
                         type="button"
                         onClick={handleLogout}
@@ -216,7 +245,7 @@ export default function Header() {
               <Avatar profile={profile} size={40} />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-[#1b1b19]">
-                  {profile?.full_name || "Người dùng"}
+                  {profile?.full_name || profile?.fullName || "Người dùng"}
                 </p>
                 <p className="truncate text-xs text-[#6b6b66]">{profile?.email}</p>
               </div>
@@ -241,6 +270,27 @@ export default function Header() {
                 </Link>
               );
             })}
+
+            {/* Menu Admin trên giao diện di động */}
+            {mounted && loggedIn && userIsAdmin && (
+              <>
+                <div className="my-1 border-t border-[#e8e6df]" />
+                <Link
+                  href="/admin/movies"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#e50914] transition-colors hover:bg-[#fef2f2]"
+                >
+                  🎬 Quản lý Phim
+                </Link>
+                <Link
+                  href="/admin/cinemas"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#2563eb] transition-colors hover:bg-[#eff6ff]"
+                >
+                  🏢 Quản lý Rạp
+                </Link>
+              </>
+            )}
 
             {mounted && loggedIn ? (
               <button

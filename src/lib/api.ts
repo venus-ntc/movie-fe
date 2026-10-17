@@ -1,8 +1,8 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const AUTH = `${API_BASE}/api/v1/auth`;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+const AUTH = `${API_BASE}/api/auth`;
 
-const ACCESS_KEY = "access_token";
-const REFRESH_KEY = "refresh_token";
+const ACCESS_KEY = "accessToken";
+const REFRESH_KEY = "refreshToken";
 
 export function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -26,6 +26,23 @@ export function clearTokens() {
   localStorage.removeItem(REFRESH_KEY);
 }
 
+// Bổ sung helper lấy User Profile và kiểm tra Admin
+export function getCurrentUser(): { id?: number; email?: string; role?: string; [key: string]: unknown } | null {
+  if (typeof window === "undefined") return null;
+  const userStr = localStorage.getItem("user");
+  if (!userStr) return null;
+  try {
+    return JSON.parse(userStr);
+  } catch {
+    return null;
+  }
+}
+
+export function isAdmin(): boolean {
+  const user = getCurrentUser();
+  return user?.role === "ADMIN" || user?.role === "admin";
+}
+
 class ApiError extends Error {
   status: number;
   data: unknown;
@@ -44,7 +61,7 @@ export async function refreshAccessToken(): Promise<string> {
 
   if (!refreshPromise) {
     refreshPromise = (async () => {
-      const res = await fetch(`${AUTH}/refresh-token/`, {
+      const res = await fetch(`${AUTH}/refresh-token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh }),
@@ -54,8 +71,10 @@ export async function refreshAccessToken(): Promise<string> {
         throw new ApiError(res.status, await res.json().catch(() => null));
       }
       const data = await res.json();
-      setTokens(data.access, data.refresh);
-      return data.access as string;
+      const newAccess = data.accessToken || data.access;
+      const newRefresh = data.refreshToken || data.refresh;
+      setTokens(newAccess, newRefresh);
+      return newAccess as string;
     })().finally(() => {
       refreshPromise = null;
     });
@@ -73,7 +92,12 @@ export async function apiFetch<T = unknown>(
   if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  let cleanPath = path.replace(/^\/+|\/+$/g, "");
+  cleanPath = cleanPath.replace(/^api\/v1\//, "").replace(/^api\//, "");
+  
+  const url = `${API_BASE}/api/${cleanPath}`;
+
+  const res = await fetch(url, { ...options, headers });
 
   if (res.status === 401 && retryOn401 && getRefreshToken()) {
     try {
@@ -91,20 +115,47 @@ export async function apiFetch<T = unknown>(
 }
 
 export interface LoginResponse {
+  accessToken?: string;
   access?: string;
   refresh?: string;
+  user?: unknown;
+  data?: any;
   [key: string]: unknown;
 }
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch(`${AUTH}/login/`, {
+  const res = await fetch(`${AUTH}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
+
   if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => null));
+
   const data: LoginResponse = await res.json();
-  if (data.access) setTokens(data.access, data.refresh);
+
+  const token =
+    data.accessToken ||
+    data.access ||
+    (data.data as any)?.accessToken ||
+    (data.result as any)?.accessToken;
+
+  const refresh =
+    data.refreshToken ||
+    data.refresh ||
+    (data.data as any)?.refreshToken;
+
+  const user = data.user || (data.data as any)?.user;
+
+  if (token) {
+    setTokens(token, refresh);
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+  } else {
+    throw new ApiError(500, { message: "Không tìm thấy token trong phản hồi từ server!" });
+  }
+
   return data;
 }
 
@@ -113,7 +164,8 @@ async function authPost<T = unknown>(
   body: Record<string, unknown>,
   method: "POST" | "PUT" = "POST"
 ): Promise<T> {
-  const res = await fetch(`${AUTH}/${path}`, {
+  const cleanPath = path.replace(/\/+$/, "");
+  const res = await fetch(`${AUTH}/${cleanPath}`, {
     method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -127,22 +179,23 @@ async function authPost<T = unknown>(
 export async function register(
   email: string,
   fullName: string,
-  password: string
+  password: string,
+  phoneNumber?: string
 ): Promise<{ message?: string }> {
-  return authPost("register/", { email, full_name: fullName, password });
+  return authPost("register", { email, fullName, password, phoneNumber });
 }
 
 export async function verifyEmail(
   email: string,
   otp: string
 ): Promise<{ message?: string }> {
-  return authPost("verify-email/", { email, otp });
+  return authPost("verify-email", { email, otp });
 }
 
 export async function requestPasswordReset(
   email: string
 ): Promise<{ message?: string }> {
-  return authPost("resend-otp/", { email });
+  return authPost("resend-otp", { email });
 }
 
 export async function resetPassword(
@@ -151,19 +204,22 @@ export async function resetPassword(
   newPassword: string
 ): Promise<LoginResponse> {
   const data = await authPost<LoginResponse>(
-    "reset-password/",
+    "reset-password",
     { email, otp, new_password: newPassword },
     "PUT"
   );
-  if (data.access) setTokens(data.access, data.refresh);
+  const token = data.accessToken || data.access;
+  if (token) setTokens(token, data.refresh);
   return data;
 }
 
 export interface Profile {
   id: number;
   email: string;
-  full_name: string;
+  full_name?: string;
+  fullName?: string;
   phone_number?: string | null;
+  phoneNumber?: string | null;
   profile_picture?: string | null;
   is_verified?: boolean;
   level?: number;
@@ -174,12 +230,14 @@ export interface Profile {
 }
 
 export async function getProfile(): Promise<Profile> {
-  return apiFetch<Profile>("/api/v1/auth/user/profile/");
+  return apiFetch<Profile>("auth/profile");
 }
 
 export interface UpdateProfilePayload {
   full_name?: string;
+  fullName?: string;
   phone_number?: string;
+  phoneNumber?: string;
   profile_picture?: string;
 }
 
@@ -187,13 +245,16 @@ export async function updateProfile(
   payload: UpdateProfilePayload
 ): Promise<{ message?: string; data: Profile }> {
   return apiFetch<{ message?: string; data: Profile }>(
-    "/api/v1/auth/user/profile/update/",
+    "auth/profile",
     { method: "PATCH", body: JSON.stringify(payload) }
   );
 }
 
 export async function logout() {
   clearTokens();
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("user");
+  }
 }
 
 export interface StudySession {
@@ -205,11 +266,11 @@ export interface StudySession {
 }
 
 export function startSession(): Promise<StudySession> {
-  return apiFetch<StudySession>("/api/v1/sessions/start/", { method: "POST" });
+  return apiFetch<StudySession>("sessions/start", { method: "POST" });
 }
 
 export function endSession(): Promise<StudySession> {
-  return apiFetch<StudySession>("/api/v1/sessions/end/", { method: "POST" });
+  return apiFetch<StudySession>("sessions/end", { method: "POST" });
 }
 
 export function readApiError(err: unknown, fallback = "Có lỗi xảy ra, thử lại sau."): string {
@@ -219,8 +280,8 @@ export function readApiError(err: unknown, fallback = "Có lỗi xảy ra, thử
     if (data && typeof data === "object") {
       const obj = data as Record<string, unknown>;
       const first =
-        obj.detail ??
         obj.message ??
+        obj.detail ??
         obj.non_field_errors ??
         Object.values(obj)[0];
       if (Array.isArray(first)) return String(first[0]);
@@ -233,3 +294,209 @@ export function readApiError(err: unknown, fallback = "Có lỗi xảy ra, thử
 }
 
 export { ApiError, API_BASE };
+
+// ==========================================
+// 🎬 API & KIỂU DỮ LIỆU PHIM (UC1 MOVIES)
+// ==========================================
+
+export type MovieStatusEnum = 'NOW_SHOWING' | 'COMING_SOON' | 'ENDED';
+
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+export interface Movie {
+  id: number;
+  title: string;
+  description?: string | null;
+  durationMinutes: number;
+  releaseDate?: string | null;
+  genres?: Genre[];
+  ageRating?: string | null;
+  director?: string | null;
+  cast?: string | null;
+  posterUrl?: string | null;
+  trailerUrl?: string | null;
+  status: MovieStatusEnum;
+  rating: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateMoviePayload {
+  title: string;
+  description?: string;
+  durationMinutes: number;
+  releaseDate: string;
+  genreIds?: number[];
+  ageRating?: string;
+  director?: string;
+  cast?: string;
+  posterUrl?: string;
+  trailerUrl?: string;
+  status?: MovieStatusEnum;
+  rating?: number;
+}
+
+export type UpdateMoviePayload = Partial<CreateMoviePayload>;
+
+export async function getMovies(): Promise<Movie[]> {
+  const res = await apiFetch<{ message: string; data: Movie[] }>("movies");
+  return res.data ?? [];
+}
+
+export async function getMovieById(id: number): Promise<Movie> {
+  const res = await apiFetch<{ message: string; data: Movie }>(`movies/${id}`);
+  return res.data;
+}
+
+export async function createMovie(payload: CreateMoviePayload): Promise<Movie> {
+  const res = await apiFetch<{ message: string; data: Movie }>("movies", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return res.data;
+}
+
+export async function updateMovie(id: number, payload: UpdateMoviePayload): Promise<Movie> {
+  const res = await apiFetch<{ message: string; data: Movie }>(`movies/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+  return res.data;
+}
+
+export async function deleteMovie(id: number): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`movies/${id}`, {
+    method: "DELETE",
+  });
+}
+
+// ==========================================
+// UC2: TYPES & API CHO QUẢN LÝ RẠP & PHÒNG CHIẾU
+// ==========================================
+
+export interface Room {
+  id: number;
+  name: string;
+  totalSeats: number;
+  cinemaId: number;
+  capacity?: number; // Giữ dạng optional để tương thích ngược nếu cần
+  status?: string;
+}
+
+export interface Cinema {
+  id: number;
+  name: string;
+  address: string;
+  city: string; // "Hà Nội", "TP. Hồ Chí Minh", "Đà Nẵng"...
+  phone?: string;
+  status?: string;
+  rooms?: Room[];
+  _count?: {
+    rooms?: number;
+  };
+}
+
+export interface CreateCinemaPayload {
+  name: string;
+  address: string;
+  city: string;
+  phone?: string;
+  status?: string;
+}
+
+export interface UpdateCinemaPayload extends Partial<CreateCinemaPayload> {}
+
+// Interface cấu hình phân loại ghế (Thường, VIP, Sweetbox...)
+export interface SeatConfig {
+  seatTypeId: number;
+  totalSeats: number;
+}
+
+export interface CreateRoomPayload {
+  name: string;
+  totalSeats: number;
+  cinemaId: number;
+  seatConfigurations?: SeatConfig[]; // Tùy chọn truyền danh sách phân loại ghế
+  status?: string;
+}
+
+export interface UpdateRoomPayload extends Partial<Omit<CreateRoomPayload, "cinemaId">> {}
+
+// --- API QUẢN LÝ RẠP CHIẾU (CINEMAS) ---
+
+export async function getCinemas(): Promise<Cinema[]> {
+  return apiFetch<Cinema[]>("/cinemas");
+}
+
+export async function getCinemaById(id: number): Promise<Cinema> {
+  return apiFetch<Cinema>(`/cinemas/${id}`);
+}
+
+export async function createCinema(payload: CreateCinemaPayload): Promise<Cinema> {
+  return apiFetch<Cinema>("/cinemas", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateCinema(id: number, payload: UpdateCinemaPayload): Promise<Cinema> {
+  return apiFetch<Cinema>(`/cinemas/${id}`, {
+    method: "PUT", // Đồng bộ dùng PUT với CinemasController
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteCinema(id: number): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>(`/cinemas/${id}`, {
+    method: "DELETE",
+  });
+}
+
+// --- API QUẢN LÝ PHÒNG CHIẾU (ROOMS) ---
+
+export async function getRoomsByCinema(cinemaId: number): Promise<Room[]> {
+  return apiFetch<Room[]>(`/cinemas/${cinemaId}/rooms`);
+}
+
+export async function createRoom(payload: CreateRoomPayload): Promise<Room> {
+  const sanitizedPayload: CreateRoomPayload = {
+    name: payload.name,
+    totalSeats: Number(payload.totalSeats),
+    cinemaId: Number(payload.cinemaId),
+    ...(payload.seatConfigurations && payload.seatConfigurations.length > 0
+      ? {
+          seatConfigurations: payload.seatConfigurations.map((item) => ({
+            seatTypeId: Number(item.seatTypeId),
+            totalSeats: Number(item.totalSeats),
+          })),
+        }
+      : {}),
+    ...(payload.status ? { status: payload.status } : {}),
+  };
+
+  return apiFetch<Room>("/cinemas/rooms", {
+    method: "POST",
+    body: JSON.stringify(sanitizedPayload),
+  });
+}
+
+export async function updateRoom(id: number, payload: UpdateRoomPayload): Promise<Room> {
+  const sanitizedPayload = {
+    ...payload,
+    ...(payload.totalSeats !== undefined ? { totalSeats: Number(payload.totalSeats) } : {}),
+  };
+
+  return apiFetch<Room>(`/cinemas/rooms/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(sanitizedPayload),
+  });
+}
+
+export async function deleteRoom(id: number): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>(`/cinemas/rooms/${id}`, {
+    method: "DELETE",
+  });
+}
