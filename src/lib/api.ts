@@ -500,3 +500,191 @@ export async function deleteRoom(id: number): Promise<{ success: boolean }> {
     method: "DELETE",
   });
 }
+
+// ==========================================
+// 💺 UC3: TYPES & API CHO QUẢN LÝ GHẾ & SƠ ĐỒ PHÒNG CHIẾU (ĐẶNG MINH QUANG)
+// ==========================================
+
+export type SeatType = "REGULAR" | "VIP" | "COUPLE";
+export type SeatStatus = "AVAILABLE" | "HOLDING" | "BOOKED" | "INACTIVE";
+
+export interface Seat {
+  id: number;
+  roomId: number;
+  row: string;
+  column: number;
+  seatNumber: string;
+  type: SeatType;
+  priceMultiplier: number;
+  status: SeatStatus;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GenerateSeatsGridPayload {
+  roomId: number;
+  rows: string[];
+  colsPerRow: number;
+  vipRows?: string[];
+}
+
+export interface CreateSeatPayload {
+  roomId: number;
+  row: string;
+  column: number;
+  seatNumber: string;
+  type: SeatType;
+  priceMultiplier?: number;
+}
+
+function unwrapData<T>(res: unknown): T {
+  if (res && typeof res === "object" && "data" in res) {
+    return (res as { data: T }).data;
+  }
+  return res as T;
+}
+
+export async function getSeatsByRoom(roomId: number): Promise<Seat[]> {
+  const res = await apiFetch<{ data: Seat[] } | Seat[]>(`seats/room/${roomId}`);
+  const result = unwrapData<Seat[]>(res);
+  return Array.isArray(result) ? result : [];
+}
+
+export async function generateSeatsGrid(
+  payload: GenerateSeatsGridPayload
+): Promise<{ created: number; skipped?: number; message?: string }> {
+  const res = await apiFetch<{ data: { created: number; skipped?: number; message?: string } } | { created: number; skipped?: number; message?: string }>("seats/generate-grid", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return unwrapData<{ created: number; skipped?: number; message?: string }>(res);
+}
+
+export async function createSeat(payload: CreateSeatPayload): Promise<Seat> {
+  const res = await apiFetch<{ data: Seat } | Seat>("seats", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return unwrapData<Seat>(res);
+}
+
+export async function deleteSeat(id: number): Promise<{ message?: string; success?: boolean }> {
+  return apiFetch(`seats/${id}`, { method: "DELETE" });
+}
+
+// ==========================================
+// 📅 UC4: TYPES & API CHO QUẢN LÝ SUẤT CHIẾU & XUNG ĐỘT (ĐẶNG MINH QUANG)
+// ==========================================
+
+export type ShowtimeStatus = "SCHEDULED" | "CANCELLED" | "COMPLETED";
+
+export interface Showtime {
+  id: number;
+  movieId: number;
+  roomId: number;
+  startTime: string;
+  endTime: string;
+  basePrice: number;
+  cleanupMinutes: number;
+  status: ShowtimeStatus;
+  movie?: Movie;
+  room?: Room & { cinema?: Cinema };
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateShowtimePayload {
+  movieId: number;
+  roomId: number;
+  startTime: string;
+  endTime: string;
+  basePrice: number;
+  cleanupMinutes?: number;
+}
+
+export type UpdateShowtimePayload = Partial<CreateShowtimePayload>;
+
+export interface CheckConflictPayload {
+  roomId: number;
+  startTime: string;
+  endTime: string;
+  cleanupMinutes?: number;
+  excludeShowtimeId?: number;
+}
+
+export interface ConflictItem {
+  id: number;
+  movieTitle: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface CheckConflictResponse {
+  hasConflict: boolean;
+  conflicts?: ConflictItem[];
+  message?: string;
+}
+
+export interface QueryShowtimeParams {
+  movieId?: number;
+  roomId?: number;
+  cinemaId?: number;
+  date?: string;
+  status?: ShowtimeStatus;
+}
+
+export async function getShowtimes(params?: QueryShowtimeParams): Promise<Showtime[]> {
+  const search = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== "") {
+        search.append(k, String(v));
+      }
+    });
+  }
+  const queryString = search.toString() ? `?${search.toString()}` : "";
+  const res = await apiFetch<{ data: Showtime[] } | Showtime[]>(`showtimes${queryString}`);
+  const result = unwrapData<Showtime[]>(res);
+  return Array.isArray(result) ? result : [];
+}
+
+export async function getShowtimeById(id: number): Promise<Showtime> {
+  const res = await apiFetch<{ data: Showtime } | Showtime>(`showtimes/${id}`);
+  return unwrapData<Showtime>(res);
+}
+
+export async function checkShowtimeConflict(
+  payload: CheckConflictPayload
+): Promise<CheckConflictResponse> {
+  const res = await apiFetch<{ data: CheckConflictResponse } | CheckConflictResponse>(
+    "showtimes/check-conflict",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+  return unwrapData<CheckConflictResponse>(res);
+}
+
+export async function createShowtime(payload: CreateShowtimePayload): Promise<Showtime> {
+  const res = await apiFetch<{ data: Showtime } | Showtime>("showtimes", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return unwrapData<Showtime>(res);
+}
+
+export async function updateShowtime(
+  id: number,
+  payload: UpdateShowtimePayload
+): Promise<Showtime> {
+  const res = await apiFetch<{ data: Showtime } | Showtime>(`showtimes/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  return unwrapData<Showtime>(res);
+}
+
+export async function cancelShowtime(id: number): Promise<{ message?: string; success?: boolean }> {
+  return apiFetch(`showtimes/${id}`, { method: "DELETE" });
+}

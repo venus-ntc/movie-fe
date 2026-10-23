@@ -175,7 +175,21 @@ export default function Header() {
                             onClick={() => setMenuOpen(false)}
                             className="block rounded-xl px-3 py-2 text-sm font-medium text-[#2563eb] transition-colors hover:bg-[#eff6ff]"
                           >
-                            🏢 Quản lý Rạp
+                            🏢 Quản lý Rạp & Phòng
+                          </Link>
+                          <Link
+                            href="/admin/seats"
+                            onClick={() => setMenuOpen(false)}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-[#10b981] transition-colors hover:bg-[#ecfdf5]"
+                          >
+                            💺 Quản lý Ghế & Sơ đồ
+                          </Link>
+                          <Link
+                            href="/admin/showtimes"
+                            onClick={() => setMenuOpen(false)}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-[#f59e0b] transition-colors hover:bg-[#fffbeb]"
+                          >
+                            📅 Quản lý Suất Chiếu
                           </Link>
                           <div className="my-1 border-t border-[#efece4]" />
                         </>
@@ -287,7 +301,21 @@ export default function Header() {
                   onClick={() => setOpen(false)}
                   className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#2563eb] transition-colors hover:bg-[#eff6ff]"
                 >
-                  🏢 Quản lý Rạp
+                  🏢 Quản lý Rạp & Phòng
+                </Link>
+                <Link
+                  href="/admin/seats"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#10b981] transition-colors hover:bg-[#ecfdf5]"
+                >
+                  💺 Quản lý Ghế & Sơ đồ
+                </Link>
+                <Link
+                  href="/admin/showtimes"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#f59e0b] transition-colors hover:bg-[#fffbeb]"
+                >
+                  📅 Quản lý Suất Chiếu
                 </Link>
               </>
             )}
