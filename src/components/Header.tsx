@@ -158,11 +158,32 @@ export default function Header() {
                       >
                         Thông tin cá nhân
                       </Link>
+                      <Link
+                        href="/my-tickets"
+                        onClick={() => setMenuOpen(false)}
+                        className="block rounded-xl px-3 py-2 text-sm font-medium text-[#ec4899] transition-colors hover:bg-[#fdf2f8]"
+                      >
+                        🎟️ Vé của tôi (Lịch sử & Hoàn hủy)
+                      </Link>
 
                       {/* Các đường dẫn quản trị dành riêng cho Admin */}
                       {userIsAdmin && (
                         <>
                           <div className="my-1 border-t border-[#efece4]" />
+                          <Link
+                            href="/admin/statistics"
+                            onClick={() => setMenuOpen(false)}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-[#8b5cf6] transition-colors hover:bg-[#f5f3ff]"
+                          >
+                            📊 Thống kê & Query Plan (UC10)
+                          </Link>
+                          <Link
+                            href="/admin/tickets"
+                            onClick={() => setMenuOpen(false)}
+                            className="block rounded-xl px-3 py-2 text-sm font-medium text-[#ec4899] transition-colors hover:bg-[#fdf2f8]"
+                          >
+                            🎟️ Tra cứu vé (UC9)
+                          </Link>
                           <Link
                             href="/admin/movies"
                             onClick={() => setMenuOpen(false)}
@@ -285,10 +306,34 @@ export default function Header() {
               );
             })}
 
+            {mounted && loggedIn && (
+              <Link
+                href="/my-tickets"
+                onClick={() => setOpen(false)}
+                className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#ec4899] transition-colors hover:bg-[#fdf2f8]"
+              >
+                🎟️ Vé của tôi (Lịch sử & Hoàn hủy)
+              </Link>
+            )}
+
             {/* Menu Admin trên giao diện di động */}
             {mounted && loggedIn && userIsAdmin && (
               <>
                 <div className="my-1 border-t border-[#e8e6df]" />
+                <Link
+                  href="/admin/statistics"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#8b5cf6] transition-colors hover:bg-[#f5f3ff]"
+                >
+                  📊 Thống kê & Query Plan (UC10)
+                </Link>
+                <Link
+                  href="/admin/tickets"
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#ec4899] transition-colors hover:bg-[#fdf2f8]"
+                >
+                  🎟️ Tra cứu vé (UC9)
+                </Link>
                 <Link
                   href="/admin/movies"
                   onClick={() => setOpen(false)}

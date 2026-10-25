@@ -11,6 +11,8 @@ export default function AdminNav() {
     { href: "/admin/cinemas", label: "Quản lý Rạp & Phòng", icon: "🏢", color: "#2563eb" },
     { href: "/admin/seats", label: "Quản lý Ghế (UC3)", icon: "💺", color: "#10b981" },
     { href: "/admin/showtimes", label: "Quản lý Suất Chiếu (UC4)", icon: "📅", color: "#f59e0b" },
+    { href: "/admin/statistics", label: "Thống kê & Query Plan (UC10)", icon: "📊", color: "#8b5cf6" },
+    { href: "/admin/tickets", label: "Tra cứu vé (UC9)", icon: "🎟️", color: "#ec4899" },
   ];
 
   return (

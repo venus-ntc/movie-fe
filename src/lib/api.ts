@@ -688,3 +688,255 @@ export async function updateShowtime(
 export async function cancelShowtime(id: number): Promise<{ message?: string; success?: boolean }> {
   return apiFetch(`showtimes/${id}`, { method: "DELETE" });
 }
+
+// ==========================================
+// 🎟️ UC9: TYPES & API CHO QUẢN LÝ VÉ & HOÀN HỦY (MAI ANH TUẤN)
+// ==========================================
+
+export type TicketStatus = "PENDING" | "VALID" | "USED" | "CANCELLED" | "EXPIRED" | "REFUNDED";
+export type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "EXPIRED";
+export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+
+export interface BookingSeat {
+  id: number;
+  seatNumber: string;
+  row?: string;
+  column?: number;
+  type?: string;
+}
+
+export interface BookingTicket {
+  id: number;
+  ticketCode: string;
+  price: number | string;
+  status: TicketStatus | string;
+  seatId?: number;
+  seat?: BookingSeat;
+}
+
+export interface BookingPayment {
+  id: number;
+  bookingId: number;
+  method: string;
+  amount: number | string;
+  status: PaymentStatus | string;
+  currency: string;
+  transactionCode?: string | null;
+  refundId?: string | null;
+  refundAmount?: number | string;
+  paidAt?: string | null;
+  refundedAt?: string | null;
+}
+
+export interface BookingDetail {
+  id: number;
+  bookingCode: string;
+  userId: number;
+  showtimeId: number;
+  voucherId?: number | null;
+  totalAmount: number | string;
+  discountAmount: number | string;
+  status: BookingStatus | string;
+  holdExpiresAt?: string | null;
+  cancelledAt?: string | null;
+  cancellationReason?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  tickets?: BookingTicket[];
+  payments?: BookingPayment[];
+  showtime?: {
+    id: number;
+    startTime: string;
+    endTime: string;
+    basePrice: number | string;
+    status?: string;
+    movie?: {
+      id: number;
+      title: string;
+      posterUrl?: string | null;
+      durationMinutes?: number;
+      ageRating?: string | null;
+      director?: string | null;
+    };
+    room?: {
+      id: number;
+      roomName: string;
+      type?: string;
+      totalSeats?: number;
+      cinema?: {
+        id: number;
+        name: string;
+        address?: string | null;
+        city?: string | null;
+      };
+    };
+  };
+}
+
+export interface CancelTicketResponse {
+  bookingCode: string;
+  status: string;
+  mode?: string;
+  message?: string;
+}
+
+export async function getMyBookings(): Promise<BookingDetail[]> {
+  const res = await apiFetch<{ data: BookingDetail[] } | BookingDetail[]>("tickets/my-history");
+  const result = unwrapData<BookingDetail[]>(res);
+  return Array.isArray(result) ? result : [];
+}
+
+export async function getBookingDetail(bookingCode: string): Promise<BookingDetail> {
+  const res = await apiFetch<{ data: BookingDetail } | BookingDetail>(`tickets/${bookingCode}`);
+  return unwrapData<BookingDetail>(res);
+}
+
+export async function cancelAndRefundTicket(bookingCode: string): Promise<CancelTicketResponse> {
+  const res = await apiFetch<{ data: CancelTicketResponse } | CancelTicketResponse>(
+    `tickets/${bookingCode}/cancel`,
+    {
+      method: "POST",
+    }
+  );
+  return unwrapData<CancelTicketResponse>(res);
+}
+
+// ==========================================
+// 📊 UC10: TYPES & API CHO THỐNG KÊ DOANH THU & QUERY PROCESSING (MAI ANH TUẤN)
+// ==========================================
+
+export interface OverviewSummary {
+  totalRevenue: number;
+  totalTicketsSold: number;
+  successfulBookings: number;
+  cancelledBookings: number;
+  cancellationRate: string;
+}
+
+export interface TopMovieRevenue {
+  movieId: number;
+  title: string;
+  totalTickets: number;
+  totalRevenue: number;
+}
+
+export interface MonthlyRevenue {
+  month: string;
+  bookingCount: number;
+  revenue: number;
+}
+
+export interface SeatOccupancy {
+  showtimeId: number;
+  movieTitle: string;
+  roomName: string;
+  startTime: string;
+  bookedSeats: number;
+  totalRoomSeats: number;
+  occupancyRate: string;
+}
+
+export interface ExplainQueryPlanItem {
+  id?: number;
+  select_type?: string;
+  table?: string;
+  partitions?: string | null;
+  type?: string;
+  possible_keys?: string | null;
+  key?: string | null;
+  key_len?: string | null;
+  ref?: string | null;
+  rows?: number;
+  filtered?: number | string;
+  Extra?: string;
+  [key: string]: unknown;
+}
+
+export interface ExplainQueryResponse {
+  query: string;
+  executionTimeMs: string;
+  executionPlan: ExplainQueryPlanItem[];
+}
+
+export interface BenchmarkResponse {
+  benchmarkOverview: string;
+  iterations: number;
+  pointLookupTest: {
+    operation: string;
+    redis: {
+      totalTimeMs: string;
+      avgTimePerOpMs: string;
+      throughputOpsSec: number;
+      complexity: string;
+    };
+    mysql: {
+      totalTimeMs: string;
+      avgTimePerOpMs: string;
+      throughputOpsSec: number;
+      complexity: string;
+    };
+    speedupFactor: string;
+    winner: string;
+    analysis: string;
+  };
+  complexAnalyticsTest: {
+    operation: string;
+    mysql: {
+      supported: boolean;
+      executionTimeMs: string;
+      method: string;
+      suitability: string;
+    };
+    redis: {
+      supported: boolean;
+      method: string;
+      suitability: string;
+    };
+    winner: string;
+    analysis: string;
+  };
+  architectureConclusion: string;
+}
+
+export async function getStatisticsSummary(): Promise<OverviewSummary> {
+  const res = await apiFetch<{ data: OverviewSummary } | OverviewSummary>("statistics/summary");
+  return unwrapData<OverviewSummary>(res);
+}
+
+export async function getTopMoviesRevenue(limit: number = 10): Promise<TopMovieRevenue[]> {
+  const res = await apiFetch<{ data: TopMovieRevenue[] } | TopMovieRevenue[]>(
+    `statistics/top-movies?limit=${limit}`
+  );
+  const result = unwrapData<TopMovieRevenue[]>(res);
+  return Array.isArray(result) ? result : [];
+}
+
+export async function getMonthlyRevenue(): Promise<MonthlyRevenue[]> {
+  const res = await apiFetch<{ data: MonthlyRevenue[] } | MonthlyRevenue[]>("statistics/monthly-revenue");
+  const result = unwrapData<MonthlyRevenue[]>(res);
+  return Array.isArray(result) ? result : [];
+}
+
+export async function getSeatOccupancy(): Promise<SeatOccupancy[]> {
+  const res = await apiFetch<{ data: SeatOccupancy[] } | SeatOccupancy[]>("statistics/seat-occupancy");
+  const result = unwrapData<SeatOccupancy[]>(res);
+  return Array.isArray(result) ? result : [];
+}
+
+export async function explainQuery(query: string): Promise<ExplainQueryResponse> {
+  const res = await apiFetch<{ data: ExplainQueryResponse } | ExplainQueryResponse>(
+    "statistics/explain",
+    {
+      method: "POST",
+      body: JSON.stringify({ query }),
+    }
+  );
+  return unwrapData<ExplainQueryResponse>(res);
+}
+
+export async function runBenchmark(iterations: number = 100): Promise<BenchmarkResponse> {
+  const res = await apiFetch<{ data: BenchmarkResponse } | BenchmarkResponse>(
+    `statistics/benchmark/mysql-vs-redis?iterations=${iterations}`
+  );
+  return unwrapData<BenchmarkResponse>(res);
+}
