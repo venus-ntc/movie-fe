@@ -372,3 +372,131 @@ export async function deleteMovie(id: number): Promise<{ message: string }> {
     method: "DELETE",
   });
 }
+
+// ==========================================
+// UC2: TYPES & API CHO QUẢN LÝ RẠP & PHÒNG CHIẾU
+// ==========================================
+
+export interface Room {
+  id: number;
+  name: string;
+  totalSeats: number;
+  cinemaId: number;
+  capacity?: number; // Giữ dạng optional để tương thích ngược nếu cần
+  status?: string;
+}
+
+export interface Cinema {
+  id: number;
+  name: string;
+  address: string;
+  city: string; // "Hà Nội", "TP. Hồ Chí Minh", "Đà Nẵng"...
+  phone?: string;
+  status?: string;
+  rooms?: Room[];
+  _count?: {
+    rooms?: number;
+  };
+}
+
+export interface CreateCinemaPayload {
+  name: string;
+  address: string;
+  city: string;
+  phone?: string;
+  status?: string;
+}
+
+export interface UpdateCinemaPayload extends Partial<CreateCinemaPayload> {}
+
+// Interface cấu hình phân loại ghế (Thường, VIP, Sweetbox...)
+export interface SeatConfig {
+  seatTypeId: number;
+  totalSeats: number;
+}
+
+export interface CreateRoomPayload {
+  name: string;
+  totalSeats: number;
+  cinemaId: number;
+  seatConfigurations?: SeatConfig[]; // Tùy chọn truyền danh sách phân loại ghế
+  status?: string;
+}
+
+export interface UpdateRoomPayload extends Partial<Omit<CreateRoomPayload, "cinemaId">> {}
+
+// --- API QUẢN LÝ RẠP CHIẾU (CINEMAS) ---
+
+export async function getCinemas(): Promise<Cinema[]> {
+  return apiFetch<Cinema[]>("/cinemas");
+}
+
+export async function getCinemaById(id: number): Promise<Cinema> {
+  return apiFetch<Cinema>(`/cinemas/${id}`);
+}
+
+export async function createCinema(payload: CreateCinemaPayload): Promise<Cinema> {
+  return apiFetch<Cinema>("/cinemas", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateCinema(id: number, payload: UpdateCinemaPayload): Promise<Cinema> {
+  return apiFetch<Cinema>(`/cinemas/${id}`, {
+    method: "PUT", // Đồng bộ dùng PUT với CinemasController
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteCinema(id: number): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>(`/cinemas/${id}`, {
+    method: "DELETE",
+  });
+}
+
+// --- API QUẢN LÝ PHÒNG CHIẾU (ROOMS) ---
+
+export async function getRoomsByCinema(cinemaId: number): Promise<Room[]> {
+  return apiFetch<Room[]>(`/cinemas/${cinemaId}/rooms`);
+}
+
+export async function createRoom(payload: CreateRoomPayload): Promise<Room> {
+  const sanitizedPayload: CreateRoomPayload = {
+    name: payload.name,
+    totalSeats: Number(payload.totalSeats),
+    cinemaId: Number(payload.cinemaId),
+    ...(payload.seatConfigurations && payload.seatConfigurations.length > 0
+      ? {
+          seatConfigurations: payload.seatConfigurations.map((item) => ({
+            seatTypeId: Number(item.seatTypeId),
+            totalSeats: Number(item.totalSeats),
+          })),
+        }
+      : {}),
+    ...(payload.status ? { status: payload.status } : {}),
+  };
+
+  return apiFetch<Room>("/cinemas/rooms", {
+    method: "POST",
+    body: JSON.stringify(sanitizedPayload),
+  });
+}
+
+export async function updateRoom(id: number, payload: UpdateRoomPayload): Promise<Room> {
+  const sanitizedPayload = {
+    ...payload,
+    ...(payload.totalSeats !== undefined ? { totalSeats: Number(payload.totalSeats) } : {}),
+  };
+
+  return apiFetch<Room>(`/cinemas/rooms/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(sanitizedPayload),
+  });
+}
+
+export async function deleteRoom(id: number): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>(`/cinemas/rooms/${id}`, {
+    method: "DELETE",
+  });
+}
