@@ -1,33 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { getAccessToken } from "@/lib/api";
+import { useAccessToken } from "@/hooks/useClientState";
 import { cinemaRequest, countdown, dateLabel, timeLabel, price, type CinemaSeat, type Screening } from "@/components/cinema/cinema-api";
 import { demoScreening, demoSeats } from "@/components/cinema/demo-data";
 import Poster from "@/components/cinema/Poster";
 import styles from "@/components/cinema/cinema.module.css";
 
-function subscribeToken(listener: () => void) {
-  window.addEventListener("storage", listener);
-  window.addEventListener("focus", listener);
-  return () => {
-    window.removeEventListener("storage", listener);
-    window.removeEventListener("focus", listener);
-  };
-}
-
 export default function SeatSelection() {
   const params = useSearchParams();
+  const accessToken = useAccessToken();
   const id = params.get("showtimeId") || "";
   const demo = params.get("demo") === "1" || /^st-/.test(id) || /^m-/.test(params.get("movieId") || "");
-  return <SeatScreen key={`${demo}:${id}:${params.get("date")}`} id={id} demo={demo} movieId={params.get("movieId")} day={params.get("date")} />;
+  return <SeatScreen key={`${demo}:${id}:${params.get("date")}:${accessToken}`} id={id} demo={demo} movieId={params.get("movieId")} day={params.get("date")} />;
 }
 
 function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; movieId: string | null; day: string | null }) {
-  const token = useSyncExternalStore(subscribeToken, getAccessToken, () => null);
+  const token = useAccessToken();
   const [now, setNow] = useState(() => Date.now());
   const [epoch] = useState(() => Date.now());
   const [demoHolds, setDemoHolds] = useState<Record<number, number>>({});
@@ -96,11 +88,22 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
   const total = mine.reduce((sum, seat) => sum + Number(info?.basePrice || 0) * seat.priceMultiplier, 0);
   const canBook = mine.length > 0 && mine.every((seat) => seat.canRelease && seat.remainingTtl > 0) && !stale && !busy && !bookingCode;
 
+  async function recoverHoldToken(seatId: number, signal: AbortSignal) {
+    const existing = holdTokensRef.current[seatId];
+    if (existing) return existing;
+    // Redis returns the current owner's original token without extending its TTL.
+    const hold = await cinemaRequest<{ holdToken: string }>("/bookings/hold-seat", {
+      method: "POST", signal, body: JSON.stringify({ showtimeId: Number(id), seatId }),
+    });
+    holdTokensRef.current[seatId] = hold.holdToken;
+    return hold.holdToken;
+  }
+
   // ==========================================
   // UC7: GIỮ GHẾ TẠM THỜI (HOLD SEAT & ATOMIC LOCK)
   // ==========================================
   async function handleToggleSeat(seat: CinemaSeat) {
-    if (busy || stale || action.current || seat.status === "BOOKED" || seat.status === "INACTIVE") return;
+    if ((seat.isHeldByMe && !seat.canRelease) || bookingCode || busy || stale || action.current || seat.status === "BOOKED" || seat.status === "INACTIVE") return;
     setActionError("");
     setMessage("");
 
@@ -126,7 +129,7 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
     try {
       if (seat.isHeldByMe) {
         // Hủy giữ ghế (Release Seat)
-        const holdToken = holdTokensRef.current[seat.id];
+        const holdToken = await recoverHoldToken(seat.id, controller.signal);
         await cinemaRequest("/bookings/release-seat", {
           method: "POST",
           signal: controller.signal,
@@ -165,7 +168,7 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
     setActionError("");
 
     if (demo) {
-      setBookingCode(`CF-DEMO-${Math.floor(100000 + Math.random() * 900000)}`);
+      setBookingCode(`CF-DEMO-${crypto.randomUUID().slice(0, 8)}`);
       setMessage("Khởi tạo đơn hàng thành công (Demo). Sẵn sàng chuyển tới cổng thanh toán Stripe.");
       return;
     }
@@ -177,7 +180,7 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
     try {
       const holdTokens: Record<number, string> = {};
       for (const seat of mine) {
-        holdTokens[seat.id] = holdTokensRef.current[seat.id] || "";
+        holdTokens[seat.id] = await recoverHoldToken(seat.id, controller.signal);
       }
 
       // Gửi yêu cầu tạo booking (Backend xử lý Transaction ACID gom các ghế đã hold)
@@ -200,6 +203,22 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
     } finally {
       action.current = null;
       if (!controller.signal.aborted) setBusy(false);
+    }
+  }
+
+  async function handleStripeCheckout() {
+    if (!bookingCode || busy) return;
+    if (demo) { setMessage("Chế độ xem thử không tạo giao dịch Stripe. Hãy chọn suất chiếu thực để thanh toán test."); return; }
+    setBusy(true);
+    setActionError("");
+    try {
+      const checkout = await cinemaRequest<{ url: string }>("/bookings/stripe/checkout", {
+        method: "POST", body: JSON.stringify({ bookingCode })
+      });
+      window.location.assign(checkout.url);
+    } catch (cause) {
+      setActionError(cause instanceof Error ? cause.message : "Không thể mở Stripe Checkout.");
+      setBusy(false);
     }
   }
 
@@ -345,16 +364,17 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
             {/* Giao diện Thanh toán sau khi đặt vé thành công (UC8) */}
             {bookingCode ? (
               <div className={styles.success}>
-                <strong>ĐẶT VÉ THÀNH CÔNG (UC8)!</strong>
+                <strong>ĐƠN ĐANG CHỜ THANH TOÁN</strong>
                 <p>Mã đơn hàng: <b>{bookingCode}</b></p>
-                <p className="mt-2 text-xs">Giao dịch đã được ghi nhận bằng Transaction Database. Vui lòng tiến hành thanh toán qua cổng Stripe.</p>
+                <p className="mt-2 text-xs">Thanh toán qua Stripe Test Mode trong thời hạn giữ ghế. Vé được xác nhận sau khi Stripe báo thành công.</p>
                 <button
                   type="button"
                   className={styles.primary}
                   style={{ marginTop: "12px" }}
-                  onClick={() => alert(`Chuyển hướng thành công sang cổng Stripe Checkout cho mã đơn: ${bookingCode}`)}
+                  disabled={busy}
+                  onClick={handleStripeCheckout}
                 >
-                  Thanh toán ngay qua Stripe
+                  {busy ? "Đang mở Stripe..." : "Thanh toán qua Stripe Test Mode"}
                 </button>
               </div>
             ) : (
