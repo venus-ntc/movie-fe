@@ -26,6 +26,23 @@ export function clearTokens() {
   localStorage.removeItem(REFRESH_KEY);
 }
 
+// Bổ sung helper lấy User Profile và kiểm tra Admin
+export function getCurrentUser(): { id?: number; email?: string; role?: string; [key: string]: unknown } | null {
+  if (typeof window === "undefined") return null;
+  const userStr = localStorage.getItem("user");
+  if (!userStr) return null;
+  try {
+    return JSON.parse(userStr);
+  } catch {
+    return null;
+  }
+}
+
+export function isAdmin(): boolean {
+  const user = getCurrentUser();
+  return user?.role === "ADMIN" || user?.role === "admin";
+}
+
 class ApiError extends Error {
   status: number;
   data: unknown;
@@ -117,7 +134,6 @@ export async function login(email: string, password: string): Promise<LoginRespo
 
   const data: LoginResponse = await res.json();
 
-  // Bóc tách token linh hoạt từ các kiểu Response của NestJS
   const token =
     data.accessToken ||
     data.access ||
@@ -129,8 +145,13 @@ export async function login(email: string, password: string): Promise<LoginRespo
     data.refresh ||
     (data.data as any)?.refreshToken;
 
+  const user = data.user || (data.data as any)?.user;
+
   if (token) {
     setTokens(token, refresh);
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
   } else {
     throw new ApiError(500, { message: "Không tìm thấy token trong phản hồi từ server!" });
   }
@@ -231,6 +252,9 @@ export async function updateProfile(
 
 export async function logout() {
   clearTokens();
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("user");
+  }
 }
 
 export interface StudySession {
@@ -270,3 +294,81 @@ export function readApiError(err: unknown, fallback = "Có lỗi xảy ra, thử
 }
 
 export { ApiError, API_BASE };
+
+// ==========================================
+// 🎬 API & KIỂU DỮ LIỆU PHIM (UC1 MOVIES)
+// ==========================================
+
+export type MovieStatusEnum = 'NOW_SHOWING' | 'COMING_SOON' | 'ENDED';
+
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+export interface Movie {
+  id: number;
+  title: string;
+  description?: string | null;
+  durationMinutes: number;
+  releaseDate?: string | null;
+  genres?: Genre[];
+  ageRating?: string | null;
+  director?: string | null;
+  cast?: string | null;
+  posterUrl?: string | null;
+  trailerUrl?: string | null;
+  status: MovieStatusEnum;
+  rating: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateMoviePayload {
+  title: string;
+  description?: string;
+  durationMinutes: number;
+  releaseDate: string;
+  genreIds?: number[];
+  ageRating?: string;
+  director?: string;
+  cast?: string;
+  posterUrl?: string;
+  trailerUrl?: string;
+  status?: MovieStatusEnum;
+  rating?: number;
+}
+
+export type UpdateMoviePayload = Partial<CreateMoviePayload>;
+
+export async function getMovies(): Promise<Movie[]> {
+  const res = await apiFetch<{ message: string; data: Movie[] }>("movies");
+  return res.data ?? [];
+}
+
+export async function getMovieById(id: number): Promise<Movie> {
+  const res = await apiFetch<{ message: string; data: Movie }>(`movies/${id}`);
+  return res.data;
+}
+
+export async function createMovie(payload: CreateMoviePayload): Promise<Movie> {
+  const res = await apiFetch<{ message: string; data: Movie }>("movies", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return res.data;
+}
+
+export async function updateMovie(id: number, payload: UpdateMoviePayload): Promise<Movie> {
+  const res = await apiFetch<{ message: string; data: Movie }>(`movies/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+  return res.data;
+}
+
+export async function deleteMovie(id: number): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`movies/${id}`, {
+    method: "DELETE",
+  });
+}
