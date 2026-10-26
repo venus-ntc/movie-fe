@@ -21,6 +21,7 @@ import {
 } from "@/lib/api";
 import { THEATERS } from "@/lib/mockData";
 import Link from "next/link";
+import AdminNav from "@/components/admin/AdminNav";
 
 const CITIES = ["Hà Nội", "TP. Hồ Chí Minh", "Đà Nẵng", "Cần Thơ", "Hải Phòng"];
 
@@ -291,6 +292,9 @@ export default function AdminCinemasPage() {
 
   return (
     <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", color: "#111827", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      {/* Admin Navigation */}
+      <AdminNav />
+
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
         <div>
@@ -641,7 +645,24 @@ export default function AdminCinemasPage() {
                       <td style={{ padding: "10px 14px", fontWeight: "600", color: "#fff" }}>{room.name}</td>
                       <td style={{ padding: "10px 14px", color: "#d1d5db" }}>{room.totalSeats ?? room.capacity} ghế</td>
                       <td style={{ padding: "10px 14px", textAlign: "right" }}>
-                        <div style={{ display: "inline-flex", gap: "8px" }}>
+                        <div style={{ display: "inline-flex", gap: "8px", alignItems: "center" }}>
+                          <Link
+                            href={`/admin/seats?cinemaId=${activeCinemaForRooms.id}&roomId=${room.id}`}
+                            style={{
+                              padding: "4px 10px",
+                              background: "#059669",
+                              color: "#fff",
+                              textDecoration: "none",
+                              borderRadius: "4px",
+                              fontSize: "12px",
+                              fontWeight: "600",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            💺 Sơ đồ ghế
+                          </Link>
                           <button
                             onClick={() => handleEditRoomClick(room)}
                             style={{ padding: "4px 10px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "12px" }}

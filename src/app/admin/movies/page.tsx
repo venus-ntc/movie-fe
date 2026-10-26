@@ -13,6 +13,7 @@ import {
   UpdateMoviePayload,
 } from "@/lib/api";
 import Link from "next/link";
+import AdminNav from "@/components/admin/AdminNav";
 
 const GENRE_OPTIONS = [
   { id: 1, name: "Khoa học viễn tưởng" },
@@ -180,6 +181,9 @@ export default function AdminMoviesPage() {
 
   return (
     <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", color: "#f3f4f6", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      {/* Admin Navigation */}
+      <AdminNav />
+
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
         <div>
