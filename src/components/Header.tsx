@@ -17,17 +17,17 @@ const NAV = [
 ];
 
 function initialOf(profile?: Profile): string {
-  const src = profile?.full_name?.trim() || profile?.email?.trim() || "";
+  const src = profile?.full_name?.trim() || profile?.fullName?.trim() || profile?.email?.trim() || "";
   return src ? src[0].toUpperCase() : "U";
 }
 
 function Avatar({ profile, size = 36 }: { profile?: Profile; size?: number }) {
   const pic = profile?.profile_picture;
-  if (pic && /^https?:\/\//.test(pic)) {
+  if (pic && typeof pic === "string" && /^https?:\/\//.test(pic)) {
     return (
       <img
         src={pic}
-        alt={profile?.full_name ?? "Avatar"}
+        alt={(profile?.full_name || profile?.fullName) ?? "Avatar"}
         width={size}
         height={size}
         className="rounded-full object-cover"
@@ -137,7 +137,7 @@ export default function Header() {
                       <Avatar profile={profile} size={40} />
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-[#1b1b19]">
-                          {profile?.full_name || "Người dùng"}
+                          {profile?.full_name || profile?.fullName || "Người dùng"}
                         </p>
                         <p className="truncate text-xs text-[#6b6b66]">
                           {profile?.email}
@@ -216,7 +216,7 @@ export default function Header() {
               <Avatar profile={profile} size={40} />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-[#1b1b19]">
-                  {profile?.full_name || "Người dùng"}
+                  {profile?.full_name || profile?.fullName || "Người dùng"}
                 </p>
                 <p className="truncate text-xs text-[#6b6b66]">{profile?.email}</p>
               </div>

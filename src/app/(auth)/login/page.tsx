@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { readApiError, setTokens } from "@/lib/api";
+import { readApiError } from "@/lib/api";
 import { useLogin } from "@/hooks/useAuth";
 import { useToast } from "@/components/Toast";
 import AuthShell from "@/components/AuthShell";
@@ -26,10 +26,10 @@ export default function LoginPage() {
     loginMutation.mutate(
       { email, password },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           toast.success("Đăng nhập thành công", "Chào mừng trở lại!");
-          router.push("/");
-          router.refresh();
+          // Dùng window.location.href để load lại toàn bộ trạng thái Auth chuẩn xác nhất
+          window.location.href = "/";
         },
         onError: (err) => toast.error("Đăng nhập thất bại", readApiError(err)),
       }
