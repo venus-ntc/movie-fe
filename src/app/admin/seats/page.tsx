@@ -58,7 +58,6 @@ function SeatsManagerContent() {
     queryKey: ["admin-cinemas-for-seats"],
     queryFn: getCinemas,
   });
-
   const currentCinema = cinemas.find(cinema => cinema.id === chosenCinemaId) ?? cinemas[0] ?? null;
   const selectedCinemaId = currentCinema?.id ?? null;
   const availableRooms: Room[] = currentCinema?.rooms ?? [];
