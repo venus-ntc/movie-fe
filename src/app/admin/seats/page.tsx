@@ -221,12 +221,9 @@ function SeatsManagerContent() {
       {/* 2. Tiêu đề Trang & Action Buttons */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "28px" }}>💺</span>
-            <h1 style={{ fontSize: "26px", fontWeight: "800", color: "#ffffff", margin: 0 }}>
-              Quản Lý Ghế & Sơ Đồ Phòng Chiếu
-            </h1>
-          </div>
+          <h1 style={{ fontSize: "26px", fontWeight: "800", color: "#ffffff", margin: 0 }}>
+            Quản Lý Ghế & Sơ Đồ Phòng Chiếu
+          </h1>
           <p style={{ color: "#a1a1aa", fontSize: "14px", margin: "6px 0 0 0" }}>
             Trực quan hóa ma trận chỗ ngồi, cấu hình loại ghế (Regular/VIP/Couple) và tạo ma trận tự động
           </p>

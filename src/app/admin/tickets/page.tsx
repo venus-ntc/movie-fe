@@ -108,7 +108,7 @@ export default function AdminTicketsPage() {
         {/* Tiêu đề trang */}
         <div style={{ marginBottom: "28px" }}>
           <h1 style={{ fontSize: "28px", fontWeight: "900", margin: "0 0 6px 0", color: "#ffffff" }}>
-            🎟️ Tra Cứu & Quản Lý Cuống Vé (Admin)
+            Tra Cứu & Quản Lý Cuống Vé
           </h1>
           <p style={{ color: "#a1a1aa", fontSize: "14px", margin: 0 }}>
             Tra cứu thông tin vé, ghế ngồi, phương thức thanh toán và kiểm tra tính hợp lệ của bất kỳ mã đặt chỗ nào trên toàn hệ thống.

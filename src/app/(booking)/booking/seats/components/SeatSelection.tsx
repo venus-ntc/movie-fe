@@ -61,7 +61,7 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
     }
   });
 
-  // Bộ đếm thời gian thực cho TTL giữ ghế (UC7)
+  // Bộ đếm thời gian thực cho TTL giữ ghế
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => {
@@ -239,14 +239,14 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
           <div className={styles.steps}>
             <span className={styles.completedStep}>01. Suất chiếu</span>
             <i />
-            <strong className={styles.completedStep}>02. Chọn ghế (UC7)</strong>
+            <strong className={styles.completedStep}>02. Chọn ghế</strong>
             <i />
-            <strong className={bookingCode ? styles.completedStep : ""}>03. Thanh toán (UC8)</strong>
+            <strong className={bookingCode ? styles.completedStep : ""}>03. Thanh toán</strong>
           </div>
         </div>
 
         {!demo && screening.data && !bookable && <p role="alert" className={styles.error}>Suất chiếu đã bắt đầu hoặc đã ngừng nhận đặt vé. Vui lòng chọn suất chiếu khác.</p>}
-        {demo && <div className={styles.demoNotice}><span>CHẾ ĐỘ XEM THỬ (DEMO)</span> Mô phỏng quy trình Giữ ghế tạm thời (UC7) & Thanh toán đơn hàng (UC8).</div>}
+        {demo && <div className={styles.demoNotice}><span>CHẾ ĐỘ XEM THỬ (DEMO)</span> Mô phỏng quy trình Giữ ghế tạm thời & Thanh toán đơn hàng.</div>}
 
         <div className={styles.bookingTitle}>
           <div>
@@ -319,7 +319,7 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
             </div>
           </section>
 
-          {/* Ticket Summary & Checkout Panel (UC8) */}
+          {/* Ticket Summary & Checkout Panel */}
           <aside className={styles.ticket}>
             {movie && (
               <div className={styles.ticketFilm}>
@@ -336,7 +336,7 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
             <div className={styles.perforation}><span /><i /><span /></div>
 
             <div className={styles.chosenHeading}>
-              <h3>Ghế đang giữ (UC7)</h3>
+              <h3>Ghế đang giữ</h3>
               <span>{mine.length} ghế</span>
             </div>
 
@@ -367,7 +367,7 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
             {actionError && <p role="alert" className={styles.error}>{actionError}</p>}
             {message && <p className={styles.actionMessage}>{message}</p>}
 
-            {/* Giao diện Thanh toán sau khi đặt vé thành công (UC8) */}
+            {/* Giao diện Thanh toán sau khi đặt vé thành công */}
             {bookingCode ? (
               <div className={styles.success}>
                 <strong>ĐƠN ĐANG CHỜ THANH TOÁN</strong>
@@ -391,7 +391,7 @@ function SeatScreen({ id, demo, movieId, day }: { id: string; demo: boolean; mov
                 onClick={handleCreateBooking}
                 className={styles.primary}
               >
-                {busy ? "Đang xử lý Transaction..." : "Xác nhận đặt vé & Thanh toán (UC8)"}
+                {busy ? "Đang xử lý Transaction..." : "Xác nhận đặt vé & Thanh toán"}
               </button>
             )}
 

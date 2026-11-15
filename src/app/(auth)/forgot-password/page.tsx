@@ -28,9 +28,9 @@ export default function ForgotPasswordPage() {
     requestReset.mutate(
       { email },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           setStep("reset");
-          toast.success("Đã yêu cầu mã khôi phục", data.delivery === "console" ? "Chế độ phát triển: kiểm tra log backend." : `Kiểm tra hộp thư ${email}.`);
+          toast.success("Đã yêu cầu mã khôi phục");
         },
         onError: (err) => toast.error("Không gửi được mã", readApiError(err)),
       }
@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
   const backToLogin = (
     <Link
       href="/login"
-      className="font-medium text-[#6b6b66] underline-offset-2 hover:underline"
+      className="font-medium text-[#f5d4d4] underline-offset-2 hover:underline"
     >
       ← Quay lại đăng nhập
     </Link>
@@ -64,8 +64,8 @@ export default function ForgotPasswordPage() {
         title="Đặt lại mật khẩu"
         subtitle={
           <>
-            {requestReset.data?.delivery === "console" ? "Chế độ phát triển: lấy mã từ log backend cho " : "Nhập mã đã gửi tới "}
-            <strong className="font-medium text-[#1b1b19]">{email}</strong> và
+            Nhập mã khôi phục cho{" "}
+            <strong className="font-medium">{email}</strong> và
             mật khẩu mới.
           </>
         }
@@ -74,12 +74,12 @@ export default function ForgotPasswordPage() {
         <form onSubmit={handleReset} className="mt-8 flex flex-col gap-4">
           {requestReset.isSuccess && (
             <p className="rounded-xl border border-[#cfe0d2] bg-[#eef4ef] px-4 py-3 text-sm text-[#4a6b50]">
-              {requestReset.data?.delivery === "console" ? "Chế độ phát triển: xem mã trong log backend." : `Nếu email hợp lệ, mã khôi phục sẽ được gửi tới ${email}.`} Mã có hiệu lực 10 phút.
+              Mã có hiệu lực 10 phút.
             </p>
           )}
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="otp" className="text-sm font-medium text-[#1b1b19]">
+            <label htmlFor="otp" className="text-sm font-medium text-[#f5d4d4]">
               Mã khôi phục
             </label>
             <input
@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="newPassword"
-              className="text-sm font-medium text-[#1b1b19]"
+              className="text-sm font-medium text-[#f5d4d4]"
             >
               Mật khẩu mới
             </label>
@@ -150,14 +150,14 @@ export default function ForgotPasswordPage() {
                 { email },
                 {
                   onSuccess: () =>
-                    toast.success("Đã gửi lại mã", `Kiểm tra hộp thư ${email}.`),
+                    toast.success("Đã yêu cầu mã mới"),
                   onError: (err) =>
                     toast.error("Không gửi được mã", readApiError(err)),
                 }
               )
             }
             disabled={requestReset.isPending}
-            className="text-sm text-[#6b6b66] underline-offset-2 hover:text-[#1b1b19] hover:underline disabled:opacity-60"
+            className="text-sm font-medium text-[#f5d4d4] underline-offset-2 hover:underline disabled:opacity-60"
           >
             {requestReset.isPending ? "Đang gửi lại..." : "Chưa nhận được mã? Gửi lại"}
           </button>

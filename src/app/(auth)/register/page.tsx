@@ -27,7 +27,6 @@ export default function RegisterPage() {
   const verifyMutation = useVerifyEmail();
   const toast = useToast();
   const resend = useResendVerification();
-  const consoleDelivery = registerMutation.data?.delivery === "console";
 
   function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -41,9 +40,9 @@ export default function RegisterPage() {
     registerMutation.mutate(
       { email, fullName, password, phoneNumber: phoneNumber || undefined },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           setStep("otp");
-          toast.success("Đã khởi tạo đăng ký", data.delivery === "console" ? "Chế độ phát triển: mã xác thực ở log backend." : "Vui lòng kiểm tra email để lấy mã xác thực.");
+          toast.success("Đã khởi tạo đăng ký");
         },
         onError: (err) => toast.error("Đăng ký thất bại", readApiError(err)),
       }
@@ -64,8 +63,8 @@ export default function RegisterPage() {
         title="Xác thực email"
         subtitle={
           <>
-            Nhập mã OTP đã tạo cho{" "}
-            <strong className="font-medium text-[#1b1b19]">{email}</strong> {consoleDelivery ? "(chế độ phát triển: xem log backend)." : "(kiểm tra hộp thư email)."}
+            Nhập mã OTP cho{" "}
+            <strong className="font-medium">{email}</strong>.
           </>
         }
         footer={
@@ -75,7 +74,7 @@ export default function RegisterPage() {
               setStep("form");
               verifyMutation.reset();
             }}
-            className="font-medium text-[#1b1b19] underline-offset-2 hover:underline"
+            className="font-medium text-[#f5d4d4] underline-offset-2 hover:underline"
           >
             ← Quay lại
           </button>
@@ -83,11 +82,11 @@ export default function RegisterPage() {
       >
         <form onSubmit={handleVerify} className="mt-8 flex flex-col gap-4">
           <p className="rounded-xl border border-[#cfe0d2] bg-[#eef4ef] px-4 py-3 text-sm text-[#4a6b50]">
-            {consoleDelivery ? "Chế độ phát triển: mã xác thực được ghi vào log backend." : "Mã xác thực đã được gửi tới email đăng ký."} Mã có hiệu lực 10 phút và chỉ dùng một lần.
+            Mã có hiệu lực 10 phút và chỉ dùng một lần.
           </p>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="otp" className="text-sm font-medium text-[#6b6b66]">
+            <label htmlFor="otp" className="text-sm font-medium text-[#f5d4d4]">
               Mã xác thực (OTP)
             </label>
             <input
@@ -121,9 +120,9 @@ export default function RegisterPage() {
             {verifyMutation.isPending ? "Đang xác thực..." : "Hoàn tất đăng ký"}
           </button>
           <button type="button" disabled={resend.isPending} onClick={() => resend.mutate(email, {
-            onSuccess: () => toast.success("Đã yêu cầu mã mới", consoleDelivery ? "Kiểm tra log backend." : "Kiểm tra email đăng ký."),
+            onSuccess: () => toast.success("Đã yêu cầu mã mới"),
             onError: error => toast.error("Không thể gửi mã", readApiError(error)),
-          })}>Gửi lại mã xác thực</button>
+          })} className="text-sm font-medium text-[#f5d4d4] underline-offset-2 hover:underline disabled:opacity-60">Gửi lại mã xác thực</button>
         </form>
       </AuthShell>
     );

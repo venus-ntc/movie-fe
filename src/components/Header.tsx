@@ -161,7 +161,7 @@ function HeaderContent({ pathname }: { pathname: string }) {
                         onClick={() => setMenuOpen(false)}
                         className="block rounded-xl px-3 py-2 text-sm font-medium text-[#ec4899] transition-colors hover:bg-[#fdf2f8]"
                       >
-                        🎟️ Vé của tôi (Lịch sử & Hoàn hủy)
+                        Vé của tôi
                       </Link>
 
                       {/* Các đường dẫn quản trị dành riêng cho Admin */}
@@ -310,7 +310,7 @@ function HeaderContent({ pathname }: { pathname: string }) {
                 onClick={() => setOpen(false)}
                 className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#ec4899] transition-colors hover:bg-[#fdf2f8]"
               >
-                🎟️ Vé của tôi (Lịch sử & Hoàn hủy)
+                Vé của tôi
               </Link>
             )}
 

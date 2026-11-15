@@ -175,7 +175,7 @@ export default function MovieExplorer() {
                 boxShadow: "0 2px 8px rgba(229, 9, 20, 0.4)",
               }}
             >
-              ⚙ Quản Lý Phim (Admin) ↗
+              ⚙ Quản Lý Phim ↗
             </Link>
           )}
         </div>

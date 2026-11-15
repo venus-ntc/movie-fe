@@ -195,23 +195,6 @@ export default function MyTicketsPage() {
           }}
         >
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-              <span
-                style={{
-                  display: "inline-block",
-                  padding: "4px 10px",
-                  background: "rgba(236, 72, 153, 0.15)",
-                  color: "#f472b6",
-                  borderRadius: "6px",
-                  fontSize: "12px",
-                  fontWeight: "800",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                UC-09: MY BOOKINGS & REFUND
-              </span>
-              <span style={{ color: "#71717a", fontSize: "12px" }}>• Hệ Thống Vé Điện Tử</span>
-            </div>
             <h1
               style={{
                 fontSize: "32px",

@@ -377,12 +377,9 @@ function ShowtimesManagerContent() {
       {/* 2. Tiêu đề Trang & Action Buttons */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "28px" }}>📅</span>
-            <h1 style={{ fontSize: "26px", fontWeight: "800", color: "#ffffff", margin: 0 }}>
-              Quản Lý Suất Chiếu & Kiểm Tra Xung Đột
-            </h1>
-          </div>
+          <h1 style={{ fontSize: "26px", fontWeight: "800", color: "#ffffff", margin: 0 }}>
+            Quản Lý Suất Chiếu & Kiểm Tra Xung Đột
+          </h1>
           <p style={{ color: "#a1a1aa", fontSize: "14px", margin: "6px 0 0 0" }}>
             Lên lịch chiếu, phát hiện xung đột phòng chiếu kèm thời gian dọn phòng, tự động sinh sơ đồ ghế
           </p>

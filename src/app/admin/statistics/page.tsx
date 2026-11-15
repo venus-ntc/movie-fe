@@ -203,7 +203,7 @@ export default function AdminStatisticsPage() {
               letterSpacing: "-0.02em",
             }}
           >
-            📊 Thống Kê Doanh Thu & Hiệu Suất Rạp
+            Thống Kê Doanh Thu & Hiệu Suất Rạp
           </h1>
           <p style={{ color: "#a1a1aa", fontSize: "15px", margin: 0, maxWidth: "780px" }}>
             Giám sát toàn diện các chỉ số KPIs kinh doanh, phân tích tỷ lệ lấp đầy ghế theo suất chiếu,
@@ -225,10 +225,10 @@ export default function AdminStatisticsPage() {
           }}
         >
           {[
-            { id: "OVERVIEW", label: "📈 Tổng Quan KPIs & Doanh Thu", color: "#8b5cf6" },
-            { id: "OCCUPANCY", label: "💺 Hiệu Suất Lấp Đầy Ghế", color: "#10b981" },
-            { id: "EXPLAIN", label: "⚡ Phân Tích Kế Hoạch (EXPLAIN Plan)", color: "#f59e0b" },
-            { id: "BENCHMARK", label: "🚀 Đối Đầu Hiệu Năng (MySQL vs Redis)", color: "#ec4899" },
+            { id: "OVERVIEW", label: "Tổng Quan KPIs & Doanh Thu", color: "#8b5cf6" },
+            { id: "OCCUPANCY", label: "Hiệu Suất Lấp Đầy Ghế", color: "#10b981" },
+            { id: "EXPLAIN", label: "Phân Tích Kế Hoạch", color: "#f59e0b" },
+            { id: "BENCHMARK", label: "Đối Đầu Hiệu Năng", color: "#ec4899" },
           ].map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -280,7 +280,6 @@ export default function AdminStatisticsPage() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                   <span style={{ fontSize: "12px", color: "#c4b5fd", fontWeight: "600" }}>TỔNG DOANH THU THỰC NHẬN</span>
-                  <span style={{ fontSize: "20px" }}>💰</span>
                 </div>
                 <div style={{ fontSize: "24px", fontWeight: "900", color: "#ffffff", marginBottom: "4px" }}>
                   {isLoadingSummary ? "Đang tính..." : formatCurrency(summary?.totalRevenue)}
@@ -299,7 +298,6 @@ export default function AdminStatisticsPage() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                   <span style={{ fontSize: "12px", color: "#6ee7b7", fontWeight: "600" }}>TỔNG VÉ ĐÃ BÁN</span>
-                  <span style={{ fontSize: "20px" }}>🎟️</span>
                 </div>
                 <div style={{ fontSize: "24px", fontWeight: "900", color: "#ffffff", marginBottom: "4px" }}>
                   {isLoadingSummary ? "..." : (summary?.totalTicketsSold || 0).toLocaleString("vi-VN")}
@@ -318,7 +316,6 @@ export default function AdminStatisticsPage() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                   <span style={{ fontSize: "12px", color: "#7dd3fc", fontWeight: "600" }}>ĐƠN THÀNH CÔNG</span>
-                  <span style={{ fontSize: "20px" }}>✅</span>
                 </div>
                 <div style={{ fontSize: "24px", fontWeight: "900", color: "#ffffff", marginBottom: "4px" }}>
                   {isLoadingSummary ? "..." : (summary?.successfulBookings || 0).toLocaleString("vi-VN")}
@@ -337,7 +334,6 @@ export default function AdminStatisticsPage() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                   <span style={{ fontSize: "12px", color: "#fca5a5", fontWeight: "600" }}>ĐƠN ĐÃ HỦY / HOÀN TIỀN</span>
-                  <span style={{ fontSize: "20px" }}>↩️</span>
                 </div>
                 <div style={{ fontSize: "24px", fontWeight: "900", color: "#ffffff", marginBottom: "4px" }}>
                   {isLoadingSummary ? "..." : (summary?.cancelledBookings || 0).toLocaleString("vi-VN")}
@@ -356,7 +352,6 @@ export default function AdminStatisticsPage() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                   <span style={{ fontSize: "12px", color: "#fde68a", fontWeight: "600" }}>TỶ LỆ HỦY VÉ</span>
-                  <span style={{ fontSize: "20px" }}>📉</span>
                 </div>
                 <div style={{ fontSize: "24px", fontWeight: "900", color: "#ffffff", marginBottom: "4px" }}>
                   {isLoadingSummary ? "..." : summary?.cancellationRate || "0.00%"}
@@ -393,7 +388,7 @@ export default function AdminStatisticsPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                   <div>
                     <h3 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: "800", color: "#fff" }}>
-                      📅 Xu Hướng Doanh Thu Theo Tháng
+                      Xu Hướng Doanh Thu Theo Tháng
                     </h3>
                     <p style={{ margin: 0, fontSize: "12px", color: "#a1a1aa" }}>
                       Tổng hợp doanh thu và số lượng booking gom nhóm theo tháng
@@ -459,7 +454,7 @@ export default function AdminStatisticsPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                   <div>
                     <h3 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: "800", color: "#fff" }}>
-                      🎬 Top Phim Doanh Thu Cao Nhất
+                      Top Phim Doanh Thu Cao Nhất
                     </h3>
                     <p style={{ margin: 0, fontSize: "12px", color: "#a1a1aa" }}>
                       Xếp hạng dựa trên tổng số vé bán và doanh thu rạp
@@ -578,7 +573,7 @@ export default function AdminStatisticsPage() {
             >
               <div>
                 <h3 style={{ margin: "0 0 4px 0", fontSize: "18px", fontWeight: "800", color: "#fff" }}>
-                  💺 Tỷ Lệ Lấp Đầy Ghế Theo Từng Suất Chiếu (Seat Occupancy Rate %)
+                  Tỷ Lệ Lấp Đầy Ghế Theo Từng Suất Chiếu (Seat Occupancy Rate %)
                 </h3>
                 <p style={{ margin: 0, fontSize: "13px", color: "#a1a1aa" }}>
                   Công thức: Occupancy Rate (%) = (Số ghế đã bán / Tổng ghế phòng chiếu) × 100%
@@ -674,7 +669,7 @@ export default function AdminStatisticsPage() {
                           <td style={{ padding: "12px 14px" }}>
                             {isGold ? (
                               <span style={{ padding: "3px 8px", borderRadius: "6px", background: "rgba(245, 158, 11, 0.2)", color: "#fbbf24", fontSize: "11px", fontWeight: "700" }}>
-                                🌟 Suất Chiếu Vàng
+                                Suất Chiếu Vàng
                               </span>
                             ) : isGood ? (
                               <span style={{ padding: "3px 8px", borderRadius: "6px", background: "rgba(16, 185, 129, 0.2)", color: "#34d399", fontSize: "11px", fontWeight: "700" }}>
@@ -712,7 +707,7 @@ export default function AdminStatisticsPage() {
             >
               <div style={{ marginBottom: "16px" }}>
                 <h3 style={{ margin: "0 0 6px 0", fontSize: "18px", fontWeight: "800", color: "#fff" }}>
-                  ⚡ Phân Tích Kế Hoạch Thực Thi Câu Lệnh (MySQL EXPLAIN Query Plan)
+                  Phân Tích Kế Hoạch Thực Thi Câu Lệnh
                 </h3>
                 <p style={{ margin: 0, fontSize: "13px", color: "#a1a1aa" }}>
                   Công cụ chuyên đề Query Processing giúp kiểm tra cách MySQL Optimizer lựa chọn chiến lược truy xuất
@@ -792,7 +787,7 @@ export default function AdminStatisticsPage() {
                     boxShadow: "0 4px 14px rgba(245, 158, 11, 0.3)",
                   }}
                 >
-                  {explainMutation.isPending ? "Đang phân tích EXPLAIN..." : "🚀 Chạy Phân Tích Kế Hoạch (EXPLAIN)"}
+                  {explainMutation.isPending ? "Đang phân tích EXPLAIN..." : "Chạy Phân Tích Kế Hoạch (EXPLAIN)"}
                 </button>
               </div>
 
@@ -809,7 +804,7 @@ export default function AdminStatisticsPage() {
                     fontSize: "13px",
                   }}
                 >
-                  ⚠️ Lỗi thực thi: {explainError}
+                  Lỗi thực thi: {explainError}
                 </div>
               )}
             </div>
@@ -836,7 +831,7 @@ export default function AdminStatisticsPage() {
                 >
                   <div>
                     <h4 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: "800", color: "#10b981" }}>
-                      ✅ Kế Hoạch Thực Thi Của MySQL Optimizer (Execution Plan)
+                      Kế Hoạch Thực Thi Của MySQL Optimizer (Execution Plan)
                     </h4>
                     <span style={{ fontSize: "12px", color: "#a1a1aa" }}>
                       Thời gian phản hồi truy vấn:{" "}
@@ -903,7 +898,7 @@ export default function AdminStatisticsPage() {
                   }}
                 >
                   <strong style={{ color: "#38bdf8", display: "block", marginBottom: "4px" }}>
-                    💡 Phân Tích Chuyên Sâu DBMS (Query Optimization Analysis):
+                    Phân Tích Chuyên Sâu DBMS (Query Optimization Analysis):
                   </strong>
                   • <strong>Kiểu truy cập (Access Type):</strong> Nếu cột <code>type</code> hiển thị{" "}
                   <code style={{ color: "#10b981" }}>eq_ref</code> hoặc <code style={{ color: "#10b981" }}>ref</code>,
@@ -934,7 +929,7 @@ export default function AdminStatisticsPage() {
             >
               <div style={{ marginBottom: "20px" }}>
                 <h3 style={{ margin: "0 0 6px 0", fontSize: "18px", fontWeight: "800", color: "#fff" }}>
-                  🚀 Thử Nghiệm Đo Lường Hiệu Năng Trực Tiếp: MySQL 8.0 vs Redis 7.x
+                  Thử Nghiệm Đo Lường Hiệu Năng Trực Tiếp
                 </h3>
                 <p style={{ margin: 0, fontSize: "13px", color: "#a1a1aa" }}>
                   Thực nghiệm đối đầu giữa cơ sở dữ liệu quan hệ đĩa từ (MySQL InnoDB) và bộ nhớ đệm In-Memory (Redis Key-Value)
@@ -996,7 +991,7 @@ export default function AdminStatisticsPage() {
                     boxShadow: "0 4px 14px rgba(236, 72, 153, 0.4)",
                   }}
                 >
-                  {benchmarkMutation.isPending ? "Đang chạy benchmark..." : `⚡ Bắt Đầu Đo Lường (${iterations} lần)`}
+                  {benchmarkMutation.isPending ? "Đang chạy benchmark..." : `Bắt Đầu Đo Lường (${iterations} lần)`}
                 </button>
               </div>
 
@@ -1012,7 +1007,7 @@ export default function AdminStatisticsPage() {
                     fontSize: "13px",
                   }}
                 >
-                  ⚠️ Lỗi đo lường: {benchmarkError}
+                  Lỗi đo lường: {benchmarkError}
                 </div>
               )}
             </div>
@@ -1053,7 +1048,7 @@ export default function AdminStatisticsPage() {
                         fontSize: "13px",
                       }}
                     >
-                      🏆 Chiến thắng: {benchmarkResult.pointLookupTest.winner} (Nhanh hơn ~{benchmarkResult.pointLookupTest.speedupFactor}x)
+                      Chiến thắng: {benchmarkResult.pointLookupTest.winner} (Nhanh hơn ~{benchmarkResult.pointLookupTest.speedupFactor}x)
                     </div>
                   </div>
 
@@ -1069,7 +1064,7 @@ export default function AdminStatisticsPage() {
                     {/* Redis Card */}
                     <div style={{ background: "#1b1c2b", border: "1px solid #2e3047", padding: "16px", borderRadius: "12px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                        <strong style={{ color: "#ec4899", fontSize: "15px" }}>🔴 REDIS (In-Memory Key-Value)</strong>
+                        <strong style={{ color: "#ec4899", fontSize: "15px" }}>REDIS (In-Memory Key-Value)</strong>
                         <span style={{ fontSize: "11px", color: "#a1a1aa" }}>O(1) Hash Lookup</span>
                       </div>
                       <div style={{ fontSize: "13px", lineHeight: "1.8", color: "#d4d4d8" }}>
@@ -1082,7 +1077,7 @@ export default function AdminStatisticsPage() {
                     {/* MySQL Card */}
                     <div style={{ background: "#1b1c2b", border: "1px solid #2e3047", padding: "16px", borderRadius: "12px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                        <strong style={{ color: "#38bdf8", fontSize: "15px" }}>🐬 MYSQL 8.0 (InnoDB B-Tree)</strong>
+                        <strong style={{ color: "#38bdf8", fontSize: "15px" }}>MYSQL 8.0 (InnoDB B-Tree)</strong>
                         <span style={{ fontSize: "11px", color: "#a1a1aa" }}>O(log N) Clustered Index</span>
                       </div>
                       <div style={{ fontSize: "13px", lineHeight: "1.8", color: "#d4d4d8" }}>
@@ -1094,7 +1089,7 @@ export default function AdminStatisticsPage() {
                   </div>
 
                   <p style={{ margin: 0, fontSize: "13px", color: "#a5b4fc", fontStyle: "italic" }}>
-                    💬 Nhận xét: {benchmarkResult.pointLookupTest.analysis}
+                    Nhận xét: {benchmarkResult.pointLookupTest.analysis}
                   </p>
                 </div>
 
@@ -1131,7 +1126,7 @@ export default function AdminStatisticsPage() {
                         fontSize: "13px",
                       }}
                     >
-                      🏆 Chiến thắng: {benchmarkResult.complexAnalyticsTest.winner}
+                      Chiến thắng: {benchmarkResult.complexAnalyticsTest.winner}
                     </div>
                   </div>
 
@@ -1146,7 +1141,7 @@ export default function AdminStatisticsPage() {
                     {/* MySQL Relational */}
                     <div style={{ background: "#1b1c2b", border: "1px solid #2e3047", padding: "16px", borderRadius: "12px" }}>
                       <strong style={{ color: "#38bdf8", fontSize: "15px", display: "block", marginBottom: "8px" }}>
-                        🐬 MYSQL (Relational Engine)
+                        MYSQL (Relational Engine)
                       </strong>
                       <div style={{ fontSize: "13px", lineHeight: "1.8", color: "#d4d4d8" }}>
                         <div>• Hỗ trợ: <strong style={{ color: "#10b981" }}>Có (Native SQL Engine)</strong></div>
@@ -1159,7 +1154,7 @@ export default function AdminStatisticsPage() {
                     {/* Redis Key-Value */}
                     <div style={{ background: "#1b1c2b", border: "1px solid #2e3047", padding: "16px", borderRadius: "12px" }}>
                       <strong style={{ color: "#ec4899", fontSize: "15px", display: "block", marginBottom: "8px" }}>
-                        🔴 REDIS (Pure Key-Value)
+                        REDIS (Pure Key-Value)
                       </strong>
                       <div style={{ fontSize: "13px", lineHeight: "1.8", color: "#d4d4d8" }}>
                         <div>• Hỗ trợ Native JOIN: <strong style={{ color: "#ef4444" }}>Không hỗ trợ</strong></div>
@@ -1170,7 +1165,7 @@ export default function AdminStatisticsPage() {
                   </div>
 
                   <p style={{ margin: 0, fontSize: "13px", color: "#a5b4fc", fontStyle: "italic" }}>
-                    💬 Nhận xét: {benchmarkResult.complexAnalyticsTest.analysis}
+                    Nhận xét: {benchmarkResult.complexAnalyticsTest.analysis}
                   </p>
                 </div>
 
@@ -1184,7 +1179,7 @@ export default function AdminStatisticsPage() {
                   }}
                 >
                   <h4 style={{ margin: "0 0 8px 0", fontSize: "16px", fontWeight: "800", color: "#c084fc" }}>
-                    🎯 Kết Luận Kiến Trúc DBMS (System Architecture Conclusion):
+                    Kết Luận Kiến Trúc DBMS (System Architecture Conclusion):
                   </h4>
                   <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.7", color: "#e4e4e7" }}>
                     {benchmarkResult.architectureConclusion}

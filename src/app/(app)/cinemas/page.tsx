@@ -2,27 +2,24 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getCinemas, Cinema, isAdmin } from "@/lib/api";
+import { getCinemas, isAdmin } from "@/lib/api";
 import Link from "next/link";
 
-const CITIES = ["Tất cả", "Hà Nội", "TP. Hồ Chí Minh", "Đà Nẵng", "Cần Thơ", "Hải Phòng"];
-
 export default function PublicCinemasPage() {
-  const [selectedCity, setSelectedCity] = useState("Tất cả");
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
 
   const { data: rawCinemas, isLoading, isError, error } = useQuery({
     queryKey: ["public-cinemas"],
     queryFn: getCinemas,
   });
 
-  const cinemasList: Cinema[] = Array.isArray(rawCinemas)
-    ? rawCinemas
-    : (rawCinemas as unknown as { data: Cinema[] })?.data ?? [];
-
-  const filteredCinemas = cinemasList.filter((c) => {
-    if (selectedCity === "Tất cả") return true;
-    return c.city === selectedCity;
-  });
+  const cinemasList = rawCinemas ?? [];
+  const cities = [...new Set(cinemasList.map((cinema) => cinema.city?.trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "vi"));
+  const cityFilter = selectedCity && cities.includes(selectedCity) ? selectedCity : null;
+  const filteredCinemas = cinemasList.filter(
+    (cinema) => cityFilter === null || cinema.city?.trim() === cityFilter,
+  );
 
   return (
     <div style={{ background: "#0b0b0f", minHeight: "100vh", color: "#fff", padding: "40px 24px 80px 24px", fontFamily: "system-ui, -apple-system, sans-serif" }}>
@@ -58,18 +55,20 @@ export default function PublicCinemasPage() {
                 transition: "all 0.2s ease",
               }}
             >
-              ⚙ Quản Lý Rạp (Admin) ↗
+              ⚙ Quản Lý Rạp ↗
             </Link>
           )}
         </div>
 
         {/* Filter Cities */}
         <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap", marginBottom: "40px" }}>
-          {CITIES.map((city) => {
-            const isActive = selectedCity === city;
+          {[null, ...cities].map((city) => {
+            const isActive = cityFilter === city;
             return (
               <button
-                key={city}
+                key={city === null ? "all-cities" : `city-${city}`}
+                type="button"
+                aria-pressed={isActive}
                 onClick={() => setSelectedCity(city)}
                 style={{
                   padding: "9px 22px",
@@ -85,7 +84,7 @@ export default function PublicCinemasPage() {
                   boxShadow: isActive ? "0 4px 14px rgba(229, 9, 20, 0.4)" : "none",
                 }}
               >
-                {city}
+                {city ?? "Tất cả"}
               </button>
             );
           })}
