@@ -61,6 +61,8 @@ function MovieDetails({ id }: { id: string }) {
 
   const showtimes = (movie.showtimes || []).map(s => ({...s, cinemaName: s.room?.cinema?.name, roomName: s.room?.name}));
 
+  const showtimes = realShowtimes.length > 0 ? realShowtimes : demoShowtimes;
+
   const embedUrl = getEmbedTrailerUrl(movie.trailerUrl);
 
   return (
@@ -145,7 +147,7 @@ function MovieDetails({ id }: { id: string }) {
 
           {showtimes.length > 0 ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "12px" }}>
-              {showtimes.map((st) => (
+              {showtimes.map((st: any) => (
                 <Link
                   key={st.id}
                   href={`/booking/seats?movieId=${movie.id}&showtimeId=${st.id}${demo ? "&demo=1" : ""}`}
