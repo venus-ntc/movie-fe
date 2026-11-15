@@ -382,8 +382,7 @@ export type UpdateRoomPayload = Partial<Omit<CreateRoomPayload, "cinemaId">>;
 // --- API QUẢN LÝ RẠP CHIẾU (CINEMAS) ---
 
 export async function getCinemas(): Promise<Cinema[]> {
-  const result = unwrapData<Cinema[]>(await apiFetch("/cinemas"));
-  return Array.isArray(result) ? result : [];
+  return unwrapData<Cinema[]>(await apiFetch("/cinemas"));
 }
 
 export async function getCinemaById(id: number): Promise<Cinema> {
@@ -413,8 +412,7 @@ export async function deleteCinema(id: number): Promise<{ success: boolean }> {
 // --- API QUẢN LÝ PHÒNG CHIẾU (ROOMS) ---
 
 export async function getRoomsByCinema(cinemaId: number): Promise<Room[]> {
-  const result = unwrapData<Room[]>(await apiFetch(`/cinemas/${cinemaId}/rooms`));
-  return Array.isArray(result) ? result : [];
+  return unwrapData<Room[]>(await apiFetch(`/cinemas/${cinemaId}/rooms`));
 }
 
 export async function createRoom(payload: CreateRoomPayload): Promise<Room> {
@@ -769,14 +767,6 @@ export async function cancelAndRefundTicket(bookingCode: string): Promise<Cancel
     }
   );
   return unwrapData<CancelTicketResponse>(res);
-}
-
-export async function mockPayBooking(bookingCode: string): Promise<any> {
-  const res = await apiFetch<any>("bookings/pay-mock", {
-    method: "POST",
-    body: JSON.stringify({ bookingCode, stripeToken: "tok_visa" }),
-  });
-  return unwrapData(res);
 }
 
 // ==========================================
