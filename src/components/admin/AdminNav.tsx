@@ -7,12 +7,12 @@ export default function AdminNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/admin/movies", label: "Quản lý Phim", icon: "🎬", color: "#e50914" },
-    { href: "/admin/cinemas", label: "Quản lý Rạp & Phòng", icon: "🏢", color: "#2563eb" },
-    { href: "/admin/seats", label: "Quản lý Ghế (UC3)", icon: "💺", color: "#10b981" },
-    { href: "/admin/showtimes", label: "Quản lý Suất Chiếu (UC4)", icon: "📅", color: "#f59e0b" },
-    { href: "/admin/statistics", label: "Thống kê & Query Plan (UC10)", icon: "📊", color: "#8b5cf6" },
-    { href: "/admin/tickets", label: "Tra cứu vé (UC9)", icon: "🎟️", color: "#ec4899" },
+    { href: "/admin/movies", label: "Quản lý Phim", color: "#e50914" },
+    { href: "/admin/cinemas", label: "Quản lý Rạp & Phòng", color: "#2563eb" },
+    { href: "/admin/seats", label: "Quản lý Ghế", color: "#10b981" },
+    { href: "/admin/showtimes", label: "Quản lý Suất Chiếu", color: "#f59e0b" },
+    { href: "/admin/statistics", label: "Thống kê & Query Plan", color: "#8b5cf6" },
+    { href: "/admin/tickets", label: "Tra cứu vé", color: "#ec4899" },
   ];
 
   return (
@@ -64,7 +64,6 @@ export default function AdminNav() {
                 transition: "all 0.15s ease",
               }}
             >
-              <span>{item.icon}</span>
               <span>{item.label}</span>
             </Link>
           );

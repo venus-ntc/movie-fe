@@ -69,9 +69,9 @@ export default function AdminTicketsPage() {
       style={{
         background: "#090a0f",
         minHeight: "100vh",
-        color: "#f4f4f5",
+        color: "#ffffff",
         padding: "24px 20px 80px 20px",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        fontFamily: "var(--font-be-vietnam), system-ui, sans-serif",
       }}
     >
       <div style={{ maxWidth: "1140px", margin: "0 auto" }}>
@@ -107,21 +107,6 @@ export default function AdminTicketsPage() {
 
         {/* Tiêu đề trang */}
         <div style={{ marginBottom: "28px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-            <span
-              style={{
-                fontSize: "12px",
-                fontWeight: "800",
-                color: "#ec4899",
-                background: "rgba(236,72,153,0.15)",
-                padding: "3px 8px",
-                borderRadius: "6px",
-              }}
-            >
-              UC-09 (ADMIN LOOKUP)
-            </span>
-            <span style={{ color: "#71717a", fontSize: "12px" }}>• Quản trị hệ thống vé</span>
-          </div>
           <h1 style={{ fontSize: "28px", fontWeight: "900", margin: "0 0 6px 0", color: "#ffffff" }}>
             🎟️ Tra Cứu & Quản Lý Cuống Vé (Admin)
           </h1>

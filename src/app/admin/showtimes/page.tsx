@@ -370,7 +370,7 @@ function ShowtimesManagerContent() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0e0708", color: "#f4f4f5", padding: "24px 32px", fontFamily: "var(--font-be-vietnam), system-ui, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#0e0708", color: "#ffffff", padding: "24px 32px", fontFamily: "var(--font-be-vietnam), system-ui, sans-serif" }}>
       {/* 1. Thanh điều hướng Admin Tabs */}
       <AdminNav />
 
@@ -379,8 +379,8 @@ function ShowtimesManagerContent() {
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ fontSize: "28px" }}>📅</span>
-            <h1 style={{ fontSize: "26px", fontWeight: "800", color: "#fff", margin: 0 }}>
-              Quản Lý Suất Chiếu & Kiểm Tra Xung Đột (UC4)
+            <h1 style={{ fontSize: "26px", fontWeight: "800", color: "#ffffff", margin: 0 }}>
+              Quản Lý Suất Chiếu & Kiểm Tra Xung Đột
             </h1>
           </div>
           <p style={{ color: "#a1a1aa", fontSize: "14px", margin: "6px 0 0 0" }}>

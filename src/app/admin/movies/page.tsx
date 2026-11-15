@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MovieImage from "@/components/cinema/MovieImage";
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -170,14 +170,14 @@ export default function AdminMoviesPage() {
   });
 
   return (
-    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", color: "#f3f4f6", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#0e0708", color: "#ffffff", padding: "24px 32px", fontFamily: "var(--font-be-vietnam), system-ui, sans-serif" }}>
       {/* Admin Navigation */}
       <AdminNav />
 
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
         <div>
-          <h1 style={{ color: "#292e36", fontSize: "26px", fontWeight: "700", margin: 0, letterSpacing: "-0.02em" }}>Quản Lý Danh Sách Phim</h1>
+          <h1 style={{ color: "#ffffff", fontSize: "26px", fontWeight: "700", margin: 0, letterSpacing: "-0.02em" }}>Quản Lý Danh Sách Phim</h1>
           <p style={{ color: "#404247", fontSize: "14px", margin: "6px 0 0 0" }}>Hệ thống quản trị dữ liệu phim dành cho Admin</p>
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
@@ -283,8 +283,8 @@ export default function AdminMoviesPage() {
                   <tr key={movie.id} style={{ borderBottom: "1px solid #27272a" }}>
                     <td style={{ padding: "14px 16px", color: "#71717a", fontWeight: "600" }}>#{movie.id}</td>
                     <td style={{ padding: "14px 16px" }}>
-                      <Image unoptimized width={42} height={60}
-                        src={movie.posterUrl || "https://via.placeholder.com/45x65"}
+                      <MovieImage unoptimized width={42} height={60}
+                        src={movie.posterUrl || "/poster-placeholder.svg"}
                         alt={movie.title}
                         style={{ width: "42px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #3f3f46" }}
                       />

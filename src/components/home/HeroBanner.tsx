@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MovieImage from "@/components/cinema/MovieImage";
 
 import { useEffect, useState } from "react";
 import { Movie } from "@/lib/catalog";
@@ -50,7 +50,7 @@ export default function HeroBanner({ movies, onWatchTrailer }: HeroBannerProps) 
           }`}
           style={{ transitionProperty: "opacity, transform" }}
         >
-          <Image unoptimized width={1920} height={1080}
+          <MovieImage unoptimized width={1920} height={1080}
             src={movie.backdropUrl}
             alt={movie.title}
             className="h-full w-full object-cover object-center filter brightness-[0.45] contrast-[1.08]"

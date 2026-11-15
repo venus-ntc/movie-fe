@@ -183,9 +183,9 @@ export default function AdminStatisticsPage() {
       style={{
         background: "linear-gradient(180deg, #090a10 0%, #0f101a 100%)",
         minHeight: "100vh",
-        color: "#f4f4f5",
+        color: "#ffffff",
         padding: "24px 20px 80px 20px",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        fontFamily: "var(--font-be-vietnam), system-ui, sans-serif",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -194,23 +194,6 @@ export default function AdminStatisticsPage() {
 
         {/* Tiêu đề & Subtitle */}
         <div style={{ marginBottom: "28px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-            <span
-              style={{
-                fontSize: "12px",
-                fontWeight: "800",
-                color: "#c084fc",
-                background: "rgba(192, 132, 252, 0.15)",
-                padding: "3px 10px",
-                borderRadius: "6px",
-                letterSpacing: "0.5px",
-              }}
-            >
-              UC-10: BUSINESS INTELLIGENCE & QUERY PROCESSING
-            </span>
-            <span style={{ color: "#71717a", fontSize: "12px" }}>• BTL DBMS (Mai Anh Tuấn)</span>
-          </div>
-
           <h1
             style={{
               fontSize: "32px",

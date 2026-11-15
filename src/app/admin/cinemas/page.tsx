@@ -24,7 +24,6 @@ import {
 import Link from "next/link";
 import AdminNav from "@/components/admin/AdminNav";
 
-const CITIES = ["Hà Nội", "TP. Hồ Chí Minh", "Đà Nẵng", "Cần Thơ", "Hải Phòng"];
 
 export default function AdminCinemasPage() {
   const queryClient = useQueryClient();
@@ -43,7 +42,7 @@ export default function AdminCinemasPage() {
   const [editingCinema, setEditingCinema] = useState<Cinema | null>(null);
   const [cinemaName, setCinemaName] = useState("");
   const [cinemaAddress, setCinemaAddress] = useState("");
-  const [cinemaCity, setCinemaCity] = useState("Hà Nội");
+  const [cinemaCity, setCinemaCity] = useState("");
   const [cinemaPhone, setCinemaPhone] = useState("");
   const [cinemaFormError, setCinemaFormError] = useState("");
 
@@ -64,12 +63,10 @@ export default function AdminCinemasPage() {
     queryFn: getCinemas,
   });
 
-  const cinemasList: Cinema[] = Array.isArray(rawCinemas)
-    ? rawCinemas
-    : (rawCinemas as unknown as { data: Cinema[] })?.data &&
-      Array.isArray((rawCinemas as unknown as { data: Cinema[] }).data)
-    ? (rawCinemas as unknown as { data: Cinema[] }).data
-    : [];
+  const cinemasList = rawCinemas ?? [];
+  const cities = [...new Set(cinemasList.map((cinema) => cinema.city?.trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "vi"));
+  const cityFilter = cities.includes(selectedCity) ? selectedCity : "ALL";
 
   const activeCinemaForRooms = activeCinemaChoice
     ? cinemasList.find(cinema => cinema.id === activeCinemaChoice.id) ?? null
@@ -141,7 +138,7 @@ export default function AdminCinemasPage() {
     setEditingCinema(null);
     setCinemaName("");
     setCinemaAddress("");
-    setCinemaCity("Hà Nội");
+    setCinemaCity("");
     setCinemaPhone("");
     setCinemaFormError("");
     setIsCinemaModalOpen(true);
@@ -166,15 +163,15 @@ export default function AdminCinemasPage() {
     e.preventDefault();
     setCinemaFormError("");
 
-    if (!cinemaName.trim() || !cinemaAddress.trim()) {
-      setCinemaFormError("Vui lòng điền đầy đủ Tên rạp và Địa chỉ.");
+    if (!cinemaName.trim() || !cinemaAddress.trim() || !cinemaCity.trim()) {
+      setCinemaFormError("Vui lòng điền đầy đủ Tên rạp, Địa chỉ và Thành phố.");
       return;
     }
 
     const payload: CreateCinemaPayload = {
       name: cinemaName,
       address: cinemaAddress,
-      city: cinemaCity,
+      city: cinemaCity.trim(),
       phone: cinemaPhone || undefined,
     };
 
@@ -277,19 +274,19 @@ export default function AdminCinemasPage() {
     const matchSearch =
       (c.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (c.address || "").toLowerCase().includes(searchTerm.toLowerCase());
-    const matchCity = selectedCity === "ALL" || c.city === selectedCity;
+    const matchCity = cityFilter === "ALL" || c.city?.trim() === cityFilter;
     return matchSearch && matchCity;
   });
 
   return (
-    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", color: "#111827", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#0e0708", color: "#ffffff", padding: "24px 32px", fontFamily: "var(--font-be-vietnam), system-ui, sans-serif" }}>
       {/* Admin Navigation */}
       <AdminNav />
 
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#292e36", margin: 0, letterSpacing: "-0.02em" }}>
+          <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#ffffff", margin: 0, letterSpacing: "-0.02em" }}>
             Quản Lý Cụm Rạp & Phòng Chiếu
           </h1>
           <p style={{ color: "#404247", fontSize: "14px", margin: "6px 0 0 0" }}>
@@ -341,12 +338,12 @@ export default function AdminCinemasPage() {
           style={{ flex: 1, padding: "9px 14px", background: "#09090b", border: "1px solid #3f3f46", borderRadius: "6px", color: "#fff", fontSize: "14px" }}
         />
         <select
-          value={selectedCity}
+          value={cityFilter}
           onChange={(e) => setSelectedCity(e.target.value)}
           style={{ padding: "9px 14px", background: "#09090b", border: "1px solid #3f3f46", borderRadius: "6px", color: "#fff", fontSize: "14px" }}
         >
           <option value="ALL">Tất cả thành phố</option>
-          {CITIES.map((city) => (
+          {cities.map((city) => (
             <option key={city} value={city}>{city}</option>
           ))}
         </select>
@@ -468,16 +465,19 @@ export default function AdminCinemasPage() {
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                 <div>
-                  <label style={{ display: "block", marginBottom: "6px", fontSize: "13px", fontWeight: "500", color: "#d4d4d8" }}>Thành phố</label>
-                  <select
+                  <label htmlFor="cinema-city" style={{ display: "block", marginBottom: "6px", fontSize: "13px", fontWeight: "500", color: "#d4d4d8" }}>Thành phố</label>
+                  <input
+                    id="cinema-city"
+                    list="cinema-city-options"
                     value={cinemaCity}
                     onChange={(e) => setCinemaCity(e.target.value)}
+                    placeholder="Chọn hoặc nhập thành phố"
+                    required
                     style={{ width: "100%", padding: "10px", background: "#09090b", border: "1px solid #3f3f46", color: "#fff", borderRadius: "8px", fontSize: "14px" }}
-                  >
-                    {CITIES.map((city) => (
-                      <option key={city} value={city}>{city}</option>
-                    ))}
-                  </select>
+                  />
+                  <datalist id="cinema-city-options">
+                    {cities.map((city) => <option key={city} value={city} />)}
+                  </datalist>
                 </div>
                 <div>
                   <label style={{ display: "block", marginBottom: "6px", fontSize: "13px", fontWeight: "500", color: "#d4d4d8" }}>Số điện thoại</label>

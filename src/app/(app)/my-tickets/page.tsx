@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MovieImage from "@/components/cinema/MovieImage";
 
 import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -634,7 +634,7 @@ export default function MyTicketsPage() {
                       }}
                     >
                       {movie?.posterUrl ? (
-                        <Image unoptimized width={200} height={300}
+                        <MovieImage unoptimized width={200} height={300}
                           src={movie.posterUrl}
                           alt={movie.title || "Movie Poster"}
                           style={{ width: "100%", height: "100%", objectFit: "cover" }}

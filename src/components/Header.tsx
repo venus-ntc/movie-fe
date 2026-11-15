@@ -173,42 +173,42 @@ function HeaderContent({ pathname }: { pathname: string }) {
                             onClick={() => setMenuOpen(false)}
                             className="block rounded-xl px-3 py-2 text-sm font-medium text-[#8b5cf6] transition-colors hover:bg-[#f5f3ff]"
                           >
-                            📊 Thống kê & Query Plan (UC10)
+                            Thống kê & Query Plan
                           </Link>
                           <Link
                             href="/admin/tickets"
                             onClick={() => setMenuOpen(false)}
                             className="block rounded-xl px-3 py-2 text-sm font-medium text-[#ec4899] transition-colors hover:bg-[#fdf2f8]"
                           >
-                            🎟️ Tra cứu vé (UC9)
+                            Tra cứu vé
                           </Link>
                           <Link
                             href="/admin/movies"
                             onClick={() => setMenuOpen(false)}
                             className="block rounded-xl px-3 py-2 text-sm font-medium text-[#e50914] transition-colors hover:bg-[#fef2f2]"
                           >
-                            🎬 Quản lý Phim
+                            Quản lý Phim
                           </Link>
                           <Link
                             href="/admin/cinemas"
                             onClick={() => setMenuOpen(false)}
                             className="block rounded-xl px-3 py-2 text-sm font-medium text-[#2563eb] transition-colors hover:bg-[#eff6ff]"
                           >
-                            🏢 Quản lý Rạp & Phòng
+                            Quản lý Rạp & Phòng
                           </Link>
                           <Link
                             href="/admin/seats"
                             onClick={() => setMenuOpen(false)}
                             className="block rounded-xl px-3 py-2 text-sm font-medium text-[#10b981] transition-colors hover:bg-[#ecfdf5]"
                           >
-                            💺 Quản lý Ghế & Sơ đồ
+                            Quản lý Ghế & Sơ đồ
                           </Link>
                           <Link
                             href="/admin/showtimes"
                             onClick={() => setMenuOpen(false)}
                             className="block rounded-xl px-3 py-2 text-sm font-medium text-[#f59e0b] transition-colors hover:bg-[#fffbeb]"
                           >
-                            📅 Quản lý Suất Chiếu
+                            Quản lý Suất Chiếu
                           </Link>
                           <div className="my-1 border-t border-[#efece4]" />
                         </>
@@ -323,42 +323,42 @@ function HeaderContent({ pathname }: { pathname: string }) {
                   onClick={() => setOpen(false)}
                   className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#8b5cf6] transition-colors hover:bg-[#f5f3ff]"
                 >
-                  📊 Thống kê & Query Plan (UC10)
+                  Thống kê & Query Plan
                 </Link>
                 <Link
                   href="/admin/tickets"
                   onClick={() => setOpen(false)}
                   className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#ec4899] transition-colors hover:bg-[#fdf2f8]"
                 >
-                  🎟️ Tra cứu vé (UC9)
+                  Tra cứu vé
                 </Link>
                 <Link
                   href="/admin/movies"
                   onClick={() => setOpen(false)}
                   className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#e50914] transition-colors hover:bg-[#fef2f2]"
                 >
-                  🎬 Quản lý Phim
+                  Quản lý Phim
                 </Link>
                 <Link
                   href="/admin/cinemas"
                   onClick={() => setOpen(false)}
                   className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#2563eb] transition-colors hover:bg-[#eff6ff]"
                 >
-                  🏢 Quản lý Rạp & Phòng
+                  Quản lý Rạp & Phòng
                 </Link>
                 <Link
                   href="/admin/seats"
                   onClick={() => setOpen(false)}
                   className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#10b981] transition-colors hover:bg-[#ecfdf5]"
                 >
-                  💺 Quản lý Ghế & Sơ đồ
+                  Quản lý Ghế & Sơ đồ
                 </Link>
                 <Link
                   href="/admin/showtimes"
                   onClick={() => setOpen(false)}
                   className="rounded-xl px-4 py-2.5 text-[15px] font-medium text-[#f59e0b] transition-colors hover:bg-[#fffbeb]"
                 >
-                  📅 Quản lý Suất Chiếu
+                  Quản lý Suất Chiếu
                 </Link>
               </>
             )}

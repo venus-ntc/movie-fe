@@ -61,8 +61,6 @@ function MovieDetails({ id }: { id: string }) {
 
   const showtimes = (movie.showtimes || []).map(s => ({...s, cinemaName: s.room?.cinema?.name, roomName: s.room?.name}));
 
-  const showtimes = realShowtimes.length > 0 ? realShowtimes : demoShowtimes;
-
   const embedUrl = getEmbedTrailerUrl(movie.trailerUrl);
 
   return (
