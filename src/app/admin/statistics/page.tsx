@@ -22,6 +22,10 @@ import {
 
 type TabKey = "OVERVIEW" | "OCCUPANCY" | "EXPLAIN" | "BENCHMARK";
 
+const DAILY_REVENUE_PAGE_SIZE = 10;
+const DAILY_REVENUE_PAGE_BUTTON =
+  "rounded-md border border-zinc-600 px-3 py-1.5 text-sm text-white enabled:cursor-pointer enabled:hover:bg-zinc-800 disabled:opacity-50";
+
 const SAMPLE_SQL_QUERIES = [
   {
     title: "1. Thống kê Doanh thu Top Phim (JOIN 4 bảng + GROUP BY + SUM)",
@@ -98,6 +102,11 @@ export default function AdminStatisticsPage() {
   const [benchmarkError, setBenchmarkError] = useState("");
 
   const daily = useQuery({ queryKey: ["admin-stats-daily"], queryFn: getDailyRevenue });
+  const [dailyPageIndex, setDailyPageIndex] = useState(0);
+  const dailyPageCount = Math.ceil((daily.data?.length ?? 0) / DAILY_REVENUE_PAGE_SIZE);
+  const currentDailyPageIndex = Math.min(dailyPageIndex, Math.max(0, dailyPageCount - 1));
+  const dailyPageStart = currentDailyPageIndex * DAILY_REVENUE_PAGE_SIZE;
+  const dailyPageRows = daily.data?.slice(dailyPageStart, dailyPageStart + DAILY_REVENUE_PAGE_SIZE);
 
   // 1. Fetch Overview KPIs
   const { data: summary, isLoading: isLoadingSummary } = useQuery<OverviewSummary>({
@@ -362,10 +371,33 @@ export default function AdminStatisticsPage() {
 
             <section style={{padding: 24, marginBottom: 24, border: "1px solid #333", borderRadius: 12}}>
               <h2>Doanh thu theo ngày (giờ Việt Nam)</h2>
-              {daily.isLoading ? <p>Đang tải…</p> : daily.isError ? <p role="alert">{readApiError(daily.error)}</p> : !daily.data?.length ? <p>Chưa có doanh thu theo ngày.</p> :
-                <table style={{width: "100%", textAlign: "left"}}><thead><tr><th>Ngày</th><th>Booking thành công</th><th>Doanh thu</th></tr></thead>
-                  <tbody>{daily.data.map(row => <tr key={row.date}><td>{row.date}</td><td>{row.bookingCount}</td><td>{Number(row.revenue).toLocaleString("vi-VN")} ₫</td></tr>)}</tbody>
-                </table>}
+              {daily.isLoading ? <p>Đang tải…</p> : daily.isError ? <p role="alert">{readApiError(daily.error)}</p> : !dailyPageRows?.length ? <p>Chưa có doanh thu theo ngày.</p> : (
+                <>
+                  <table style={{ width: "100%", textAlign: "left" }}>
+                    <thead><tr><th>Ngày</th><th>Booking thành công</th><th>Doanh thu</th></tr></thead>
+                    <tbody>
+                      {dailyPageRows.map((row) => (
+                        <tr key={row.date}>
+                          <td>{row.date}</td>
+                          <td>{row.bookingCount}</td>
+                          <td>{Number(row.revenue).toLocaleString("vi-VN")} ₫</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {dailyPageCount > 1 && (
+                    <nav aria-label="Phân trang doanh thu theo ngày" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "flex-end", gap: 12, marginTop: 16 }}>
+                      <button type="button" className={DAILY_REVENUE_PAGE_BUTTON} disabled={currentDailyPageIndex === 0} onClick={() => setDailyPageIndex(currentDailyPageIndex - 1)}>
+                        Trang trước
+                      </button>
+                      <span aria-live="polite">Trang {currentDailyPageIndex + 1} / {dailyPageCount}</span>
+                      <button type="button" className={DAILY_REVENUE_PAGE_BUTTON} disabled={currentDailyPageIndex === dailyPageCount - 1} onClick={() => setDailyPageIndex(currentDailyPageIndex + 1)}>
+                        Trang sau
+                      </button>
+                    </nav>
+                  )}
+                </>
+              )}
             </section>
             {/* Khối Biểu Đồ Doanh Thu Theo Tháng & Xếp Hạng Top Phim */}
             <div
